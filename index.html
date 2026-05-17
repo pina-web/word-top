@@ -6,7 +6,7 @@
 <title>단어의 탑 · Word Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Lora:ital,wght@0,500;0,700;1,500;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --parchment:#f4ead5;
@@ -376,18 +376,25 @@ body::before{
   background:rgba(255,255,255,.55);
   border:1px dashed rgba(58,39,24,.3);
   border-radius:10px;
-  padding:12px 14px;
-  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:0;
 }
 .word-item .word-text{
-  display:flex;align-items:center;gap:14px;flex:1;min-width:0;
+  display:flex;align-items:center;flex:1;min-width:0;gap:0;
 }
 .word-item .kr{
-  font-family:'Gaegu',cursive;font-weight:700;font-size:26px;color:var(--ink);line-height:1.1;flex-shrink:0;min-width:88px;
+  font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:26px;
+  color:var(--ink);line-height:1.15;
+  flex:0 0 42%;padding-right:14px;text-align:center;
 }
-.word-item .en-block{flex:1;text-align:left;line-height:1.15;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
-.en-upper{font-family:'Cinzel',serif;font-weight:700;font-size:22px;color:var(--magic);letter-spacing:.05em;display:block;line-height:1.1}
-.en-lower{font-family:'Lora',Georgia,serif;font-weight:500;font-size:19px;color:var(--ink-soft);font-style:italic;letter-spacing:0;display:block;line-height:1.1}
+.word-item .en-block{
+  flex:1;line-height:1.2;min-width:0;
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  border-left:2px dotted rgba(58,39,24,.45);
+  padding-left:16px;
+}
+.en-upper{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:22px;color:var(--magic);letter-spacing:.03em;display:block;line-height:1.15}
+.en-lower{font-family:'Noto Sans KR',sans-serif;font-weight:500;font-size:20px;color:var(--ink-soft);letter-spacing:.01em;display:block;line-height:1.15}
 
 /* Speak button */
 .speak-btn{
@@ -426,16 +433,16 @@ body::before{
   letter-spacing:.2em;color:var(--ink-soft);margin-bottom:6px;
 }
 .q-prompt{
-  font-family:'Gaegu',cursive;font-weight:700;
-  font-size:60px;text-align:center;color:var(--ink);margin-bottom:20px;line-height:1.1;
+  font-family:'Noto Sans KR',sans-serif;font-weight:700;
+  font-size:60px;text-align:center;color:var(--ink);margin-bottom:20px;line-height:1.15;
   min-height:80px;display:flex;align-items:center;justify-content:center;gap:12px;
-  flex-wrap:wrap;
+  flex-wrap:wrap;letter-spacing:-.01em;
 }
 .q-prompt.en-mode{display:block;}
 .q-prompt.en-mode .en-prompt-block{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
-.q-prompt.en-mode .en-prompt-text{display:flex;flex-direction:column;align-items:center;line-height:1.05}
-.q-prompt.en-mode .en-upper-big{font-family:'Cinzel',serif;font-weight:700;font-size:54px;color:var(--magic);letter-spacing:.04em;line-height:1.1}
-.q-prompt.en-mode .en-lower-big{font-family:'Lora',Georgia,serif;font-weight:500;font-size:40px;color:var(--ink-soft);font-style:italic;letter-spacing:0;margin-top:8px;line-height:1.1}
+.q-prompt.en-mode .en-prompt-text{display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.q-prompt.en-mode .en-upper-big{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:54px;color:var(--magic);letter-spacing:.03em;line-height:1.15}
+.q-prompt.en-mode .en-lower-big{font-family:'Noto Sans KR',sans-serif;font-weight:500;font-size:44px;color:var(--ink-soft);letter-spacing:.01em;margin-top:6px;line-height:1.15}
 .q-input{
   width:100%;
   background:var(--parchment);
@@ -443,12 +450,12 @@ body::before{
   border-radius:12px;
   padding:16px 18px;
   font-size:24px;
-  font-family:'Cinzel',serif;font-weight:500;
-  color:var(--ink);text-align:center;letter-spacing:.05em;
+  font-family:'Noto Sans KR',sans-serif;font-weight:500;
+  color:var(--ink);text-align:center;letter-spacing:.01em;
   outline:none;
   transition:all .15s ease;
 }
-.q-input.kr-mode{font-family:'Gaegu',cursive;font-weight:700;font-size:24px;letter-spacing:0;}
+.q-input.kr-mode{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:24px;letter-spacing:0;}
 .q-input:focus{border-color:var(--magic);box-shadow:0 0 0 3px rgba(93,58,142,.18)}
 .q-input.correct{border-color:var(--moss);background:#e8f2dc}
 .q-input.wrong{border-color:var(--rose);background:#f5dadd}
