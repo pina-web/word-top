@@ -6,7 +6,7 @@
 <title>단어의 탑 · Word Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Lora:ital,wght@0,500;0,700;1,500;1,700&display=swap" rel="stylesheet">
 <style>
 :root{
   --parchment:#f4ead5;
@@ -376,15 +376,18 @@ body::before{
   background:rgba(255,255,255,.55);
   border:1px dashed rgba(58,39,24,.3);
   border-radius:10px;
-  padding:10px 12px;
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+}
+.word-item .word-text{
+  display:flex;align-items:center;gap:14px;flex:1;min-width:0;
 }
 .word-item .kr{
-  font-family:'Gaegu',cursive;font-weight:700;font-size:21px;color:var(--ink);line-height:1.1;flex-shrink:0;
+  font-family:'Gaegu',cursive;font-weight:700;font-size:26px;color:var(--ink);line-height:1.1;flex-shrink:0;min-width:88px;
 }
-.word-item .en-block{flex:1;text-align:right;line-height:1.2;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
-.en-upper{font-family:'Cinzel',serif;font-weight:700;font-size:19px;color:var(--magic);letter-spacing:.04em;display:block;line-height:1.1}
-.en-lower{font-family:'Cinzel',serif;font-weight:500;font-size:15px;color:var(--ink-soft);font-style:italic;letter-spacing:.02em;display:block;line-height:1.1}
+.word-item .en-block{flex:1;text-align:left;line-height:1.15;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.en-upper{font-family:'Cinzel',serif;font-weight:700;font-size:22px;color:var(--magic);letter-spacing:.05em;display:block;line-height:1.1}
+.en-lower{font-family:'Lora',Georgia,serif;font-weight:500;font-size:19px;color:var(--ink-soft);font-style:italic;letter-spacing:0;display:block;line-height:1.1}
 
 /* Speak button */
 .speak-btn{
@@ -432,7 +435,7 @@ body::before{
 .q-prompt.en-mode .en-prompt-block{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
 .q-prompt.en-mode .en-prompt-text{display:flex;flex-direction:column;align-items:center;line-height:1.05}
 .q-prompt.en-mode .en-upper-big{font-family:'Cinzel',serif;font-weight:700;font-size:54px;color:var(--magic);letter-spacing:.04em;line-height:1.1}
-.q-prompt.en-mode .en-lower-big{font-family:'Cinzel',serif;font-weight:500;font-size:36px;color:var(--ink-soft);font-style:italic;letter-spacing:.02em;margin-top:6px;line-height:1.1}
+.q-prompt.en-mode .en-lower-big{font-family:'Lora',Georgia,serif;font-weight:500;font-size:40px;color:var(--ink-soft);font-style:italic;letter-spacing:0;margin-top:8px;line-height:1.1}
 .q-input{
   width:100%;
   background:var(--parchment);
@@ -563,9 +566,9 @@ body::before{
   .q-prompt.en-mode .en-lower-big{font-size:28px}
   .q-input{font-size:22px;padding:14px 16px}
   .q-input.kr-mode{font-size:22px}
-  .word-item .kr{font-size:20px}
-  .en-upper{font-size:18px}
-  .en-lower{font-size:14px}
+  .word-item .kr{font-size:24px;min-width:74px}
+  .en-upper{font-size:20px}
+  .en-lower{font-size:17px}
   .map-header{flex-direction:column;align-items:stretch}
   .progress-banner{justify-content:center;flex-wrap:wrap}
   .speak-btn{width:38px;height:38px;font-size:17px}
@@ -1093,10 +1096,12 @@ function openQuest(q){
     const upper = w.en.toUpperCase();
     const lower = w.en.toLowerCase();
     item.innerHTML = `
-      <span class="kr">${w.kr}</span>
-      <div class="en-block">
-        <span class="en-upper">${upper}</span>
-        <span class="en-lower">${lower}</span>
+      <div class="word-text">
+        <span class="kr">${w.kr}</span>
+        <div class="en-block">
+          <span class="en-upper">${upper}</span>
+          <span class="en-lower">${lower}</span>
+        </div>
       </div>
       <button class="speak-btn" data-word="${w.en}" title="발음 듣기">🔊</button>
     `;
