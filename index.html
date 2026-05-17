@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단어의 탑 · Word Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#f4ead5;
+  --parchment-dark:#e8d9b0;
+  --ink:#3a2718;
+  --ink-soft:#5a4530;
+  --magic:#5d3a8e;
+  --magic-light:#8d6cb8;
+  --gold:#c89738;
+  --gold-light:#e6c266;
+  --moss:#5a7a3d;
+  --rose:#b8525f;
+  --sky:#7da6c4;
+  --shadow:rgba(58,39,24,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:'Gowun Dodum',sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at top,#fff5d4 0%,transparent 50%),
+    radial-gradient(ellipse at bottom,#d4c08a 0%,transparent 60%),
+    #f4ead5;
+  min-height:100vh;
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;
+  background-image:
+    radial-gradient(circle at 12% 18%,rgba(58,39,24,.04) 1px,transparent 2px),
+    radial-gradient(circle at 78% 32%,rgba(58,39,24,.05) 1px,transparent 2px),
+    radial-gradient(circle at 35% 78%,rgba(58,39,24,.04) 1px,transparent 2px),
+    radial-gradient(circle at 88% 88%,rgba(58,39,24,.05) 1px,transparent 2px);
+  background-size:200px 200px,180px 180px,220px 220px,190px 190px;
+  pointer-events:none;z-index:0;
+}
+.app{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:24px 20px 60px}
+
+/* Screens */
+.screen{display:none;animation:fadeIn .4s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Top title */
+.title{
+  font-family:'Cinzel',serif;font-weight:700;
+  text-align:center;letter-spacing:.18em;
+  font-size:14px;color:var(--ink-soft);margin-bottom:6px;
+}
+.title-main{
+  font-family:'Gaegu',cursive;font-weight:700;
+  text-align:center;font-size:42px;color:var(--ink);
+  letter-spacing:-.02em;margin-bottom:8px;
+  text-shadow:2px 2px 0 rgba(200,151,56,.25);
+}
+.title-sub{
+  text-align:center;color:var(--ink-soft);font-size:14px;
+  margin-bottom:32px;letter-spacing:.05em;
+}
+
+/* Card */
+.card{
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:18px;
+  padding:28px 24px;
+  box-shadow:
+    0 4px 0 rgba(58,39,24,.15),
+    0 12px 30px rgba(58,39,24,.18),
+    inset 0 0 0 6px rgba(200,151,56,.08),
+    inset 0 0 50px rgba(200,151,56,.08);
+  position:relative;
+}
+.card::before{
+  content:"";position:absolute;inset:8px;
+  border:1px dashed rgba(58,39,24,.25);border-radius:12px;pointer-events:none;
+}
+
+/* Welcome screen */
+.welcome-card{padding:36px 28px}
+.welcome-art{
+  font-size:60px;text-align:center;margin-bottom:8px;line-height:1;
+}
+.welcome-text{
+  font-family:'Gaegu',cursive;font-size:18px;line-height:1.7;
+  text-align:center;color:var(--ink);margin-bottom:24px;
+  white-space:pre-line;
+}
+.welcome-text strong{color:var(--magic)}
+.welcome-rules{
+  background:rgba(200,151,56,.1);
+  border:1px dashed var(--gold);
+  border-radius:10px;
+  padding:14px 18px;
+  font-size:13px;line-height:1.7;
+  color:var(--ink-soft);
+  margin-bottom:24px;
+}
+.welcome-rules-title{
+  font-family:'Cinzel',serif;font-weight:700;
+  font-size:11px;letter-spacing:.2em;color:var(--gold);
+  margin-bottom:6px;
+}
+
+/* Character select */
+.char-prompt{
+  font-family:'Gaegu',cursive;font-size:22px;
+  text-align:center;margin-bottom:18px;color:var(--magic);
+  font-weight:700;
+}
+.char-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  margin-bottom:18px;
+}
+.char-cell{
+  aspect-ratio:1;
+  background:rgba(255,255,255,.55);
+  border:2px solid rgba(58,39,24,.25);
+  border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:all .15s ease;
+  padding:6px 4px;
+  text-align:center;
+}
+.char-cell .emoji{font-size:28px;line-height:1}
+.char-cell .name{font-size:9.5px;color:var(--ink-soft);margin-top:2px;line-height:1.1}
+.char-cell:hover{
+  background:#fff5d4;border-color:var(--gold);
+  transform:translateY(-2px);
+  box-shadow:0 4px 0 rgba(200,151,56,.3);
+}
+.char-cell.selected{
+  background:var(--magic);
+  border-color:var(--magic);
+  color:#fff5d4;
+  box-shadow:0 0 0 3px var(--gold-light), 0 4px 0 rgba(200,151,56,.3);
+}
+.char-cell.selected .name{color:#fff5d4}
+
+/* Button */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:'Cinzel',serif;font-weight:700;letter-spacing:.15em;
+  background:var(--ink);color:var(--parchment);
+  border:none;border-radius:999px;
+  padding:14px 28px;font-size:13px;cursor:pointer;
+  box-shadow:0 4px 0 rgba(58,39,24,.4);
+  transition:all .12s ease;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(58,39,24,.4)}
+.btn:active{transform:translateY(1px);box-shadow:0 2px 0 rgba(58,39,24,.4)}
+.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 4px 0 rgba(200,151,56,.5)}
+.btn.gold:hover{box-shadow:0 6px 0 rgba(200,151,56,.5)}
+.btn.magic{background:var(--magic);color:#fff5d4;box-shadow:0 4px 0 rgba(93,58,142,.5)}
+.btn.magic:hover{box-shadow:0 6px 0 rgba(93,58,142,.5)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+
+/* Map screen */
+.map-header{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:18px;flex-wrap:wrap;
+}
+.me-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  padding:6px 14px 6px 6px;
+  cursor:pointer;
+  font-family:'Gaegu',cursive;font-weight:700;
+  box-shadow:0 2px 0 var(--shadow);
+}
+.me-pill .me-emoji{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--gold-light);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.me-pill .me-name{font-size:14px;color:var(--ink)}
+.me-pill .me-action{font-size:10px;color:var(--ink-soft);letter-spacing:.1em;font-family:'Cinzel',serif}
+
+.progress-banner{
+  display:flex;gap:8px;flex:1;justify-content:flex-end;flex-wrap:wrap;
+}
+.progress-pill{
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  padding:6px 14px;
+  font-family:'Cinzel',serif;font-weight:500;
+  font-size:11px;letter-spacing:.15em;
+  box-shadow:0 2px 0 var(--shadow);
+}
+.progress-pill span{color:var(--magic);font-weight:700}
+
+.direction-toggle{
+  display:flex;
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  padding:3px;
+  cursor:pointer;
+  font-family:'Cinzel',serif;
+  font-size:11px;
+  letter-spacing:.1em;
+  font-weight:700;
+  box-shadow:0 2px 0 var(--shadow);
+  user-select:none;
+}
+.direction-toggle .dir-option{
+  padding:4px 11px;
+  border-radius:999px;
+  transition:all .2s ease;
+  color:var(--ink-soft);
+}
+.direction-toggle .dir-option.active{
+  background:var(--magic);
+  color:#fff5d4;
+}
+
+.tower-map{
+  position:relative;
+  padding:30px 10px;
+  min-height:600px;
+}
+.tower-map::before{
+  content:"";position:absolute;left:50%;top:30px;bottom:30px;
+  width:0;border-left:3px dashed var(--ink-soft);opacity:.4;
+  transform:translateX(-50%);z-index:0;
+}
+.zone-divider{
+  position:relative;z-index:2;
+  margin:24px 0 18px;
+  text-align:center;
+  font-family:'Cinzel',serif;font-weight:700;
+  letter-spacing:.25em;font-size:11px;color:var(--gold);
+}
+.zone-divider .zone-icon{font-size:22px;display:block;margin-bottom:4px}
+.zone-divider .zone-label{
+  display:inline-block;
+  padding:4px 14px;
+  background:var(--parchment);
+  border:1px dashed var(--gold);
+  border-radius:999px;
+}
+
+.node-row{
+  position:relative;z-index:1;
+  display:flex;align-items:center;
+  margin-bottom:14px;min-height:60px;
+}
+.node-row.right{justify-content:flex-end}
+.node-row.left{justify-content:flex-start}
+.node{
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:14px;
+  padding:8px 14px;
+  cursor:pointer;
+  width:42%;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 3px 0 var(--shadow);
+  transition:all .15s ease;
+  position:relative;
+}
+.node:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--shadow)}
+.node.locked{
+  opacity:.45;cursor:not-allowed;
+  background:repeating-linear-gradient(45deg,var(--parchment-dark),var(--parchment-dark) 4px,var(--parchment) 4px,var(--parchment) 8px);
+}
+.node.locked:hover{transform:none}
+.node.cleared{
+  background:#e8f2dc;
+  border-color:var(--moss);
+}
+.node.cleared::after{
+  content:"✓";
+  position:absolute;top:-6px;right:-6px;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--moss);color:#fff;
+  font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--parchment);
+}
+.node-icon{
+  font-size:24px;width:38px;height:38px;
+  border-radius:8px;
+  background:rgba(200,151,56,.18);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.node-info{flex:1;min-width:0}
+.node-num{
+  font-family:'Cinzel',serif;font-weight:700;
+  font-size:9px;letter-spacing:.2em;color:var(--gold);
+}
+.node-title{
+  font-family:'Gaegu',cursive;font-weight:700;
+  font-size:14px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.node-meta{
+  font-size:10px;color:var(--ink-soft);
+}
+.node.unlocked .node-icon{
+  background:var(--gold);color:var(--ink);
+  animation:nodePulse 2s ease-in-out infinite;
+}
+@keyframes nodePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(200,151,56,.5)}
+  50%{box-shadow:0 0 0 8px rgba(200,151,56,0)}
+}
+
+/* Quest screen */
+.quest-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;gap:10px;
+}
+.quest-back{
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:8px;
+  padding:6px 12px;
+  cursor:pointer;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:.1em;
+}
+.quest-info{
+  text-align:center;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;
+  color:var(--ink-soft);
+}
+.quest-info .num{color:var(--magic);font-weight:700}
+
+.phase-card{padding:24px}
+.phase-label{
+  font-family:'Cinzel',serif;font-weight:700;letter-spacing:.25em;
+  font-size:11px;color:var(--gold);text-align:center;margin-bottom:4px;
+}
+.phase-title{
+  font-family:'Gaegu',cursive;font-weight:700;
+  font-size:30px;text-align:center;color:var(--ink);margin-bottom:6px;
+}
+.phase-desc{
+  text-align:center;color:var(--ink-soft);font-size:13px;margin-bottom:18px;
+}
+
+/* Memorize phase */
+.timer{
+  text-align:center;font-family:'Cinzel',serif;
+  font-weight:700;font-size:24px;
+  color:var(--magic);letter-spacing:.1em;
+  margin-bottom:18px;
+}
+.timer.urgent{color:var(--rose);animation:tickle .5s ease infinite}
+@keyframes tickle{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.word-list{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-bottom:18px;
+}
+.word-item{
+  background:rgba(255,255,255,.55);
+  border:1px dashed rgba(58,39,24,.3);
+  border-radius:10px;
+  padding:10px 12px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+}
+.word-item .kr{
+  font-family:'Gaegu',cursive;font-weight:700;font-size:15px;
+}
+.word-item .en{
+  font-family:'Cinzel',serif;font-weight:500;
+  color:var(--magic);font-size:13px;letter-spacing:.05em;
+  display:inline-flex;align-items:center;gap:4px;
+}
+
+/* Speak button */
+.speak-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;
+  border-radius:50%;
+  border:1.5px solid var(--ink);
+  background:var(--parchment);
+  cursor:pointer;
+  font-size:11px;
+  vertical-align:middle;
+  transition:all .15s ease;
+  padding:0;line-height:1;
+}
+.speak-btn:hover{
+  background:var(--gold-light);
+  transform:scale(1.15);
+}
+.speak-btn:active{transform:scale(.95)}
+.speak-btn.large{
+  width:38px;height:38px;font-size:18px;
+}
+.speak-btn.speaking{
+  background:var(--magic);
+  border-color:var(--magic);
+  color:#fff5d4;
+  animation:speakPulse 1s ease-in-out infinite;
+}
+@keyframes speakPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.2)}
+}
+
+/* Test phase */
+.q-counter{
+  text-align:center;font-family:'Cinzel',serif;font-size:11px;
+  letter-spacing:.2em;color:var(--ink-soft);margin-bottom:6px;
+}
+.q-prompt{
+  font-family:'Gaegu',cursive;font-weight:700;
+  font-size:48px;text-align:center;color:var(--ink);margin-bottom:18px;
+  min-height:60px;display:flex;align-items:center;justify-content:center;gap:12px;
+  flex-wrap:wrap;
+}
+.q-prompt.en-mode{
+  font-family:'Cinzel',serif;font-weight:700;font-size:42px;
+  color:var(--magic);letter-spacing:.04em;
+}
+.q-input{
+  width:100%;
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:12px;
+  padding:14px 18px;
+  font-size:18px;
+  font-family:'Cinzel',serif;font-weight:500;
+  color:var(--ink);text-align:center;letter-spacing:.05em;
+  outline:none;
+  transition:all .15s ease;
+}
+.q-input.kr-mode{
+  font-family:'Gaegu',cursive;font-weight:700;font-size:20px;
+  letter-spacing:0;
+}
+.q-input:focus{border-color:var(--magic);box-shadow:0 0 0 3px rgba(93,58,142,.18)}
+.q-input.correct{border-color:var(--moss);background:#e8f2dc}
+.q-input.wrong{border-color:var(--rose);background:#f5dadd}
+.q-feedback{
+  text-align:center;margin-top:10px;font-size:14px;min-height:22px;
+  font-family:'Gaegu',cursive;font-weight:700;
+}
+.q-feedback.correct{color:var(--moss)}
+.q-feedback.wrong{color:var(--rose)}
+.q-progress-bar{
+  height:6px;
+  background:rgba(58,39,24,.15);
+  border-radius:3px;
+  overflow:hidden;
+  margin-top:14px;
+}
+.q-progress-fill{
+  height:100%;background:var(--magic);
+  transition:width .3s ease;
+}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(58,39,24,.55);
+  backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+  animation:fadeIn .25s ease;
+}
+.modal-overlay.active{display:flex}
+.modal{
+  background:var(--parchment);
+  border:2px solid var(--ink);
+  border-radius:18px;
+  padding:28px 24px;
+  max-width:440px;width:100%;max-height:85vh;overflow-y:auto;
+  box-shadow:0 12px 40px rgba(0,0,0,.3);
+  position:relative;
+  animation:popIn .3s ease;
+}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;cursor:pointer;
+  font-size:22px;color:var(--ink-soft);
+  width:30px;height:30px;border-radius:50%;
+}
+.modal-close:hover{background:rgba(58,39,24,.1)}
+.modal-title{
+  font-family:'Gaegu',cursive;font-weight:700;
+  font-size:24px;color:var(--magic);text-align:center;margin-bottom:6px;
+}
+.modal-sub{text-align:center;color:var(--ink-soft);font-size:12px;margin-bottom:18px}
+
+/* Result modal */
+.result-art{font-size:64px;text-align:center;margin:6px 0}
+.result-title{
+  font-family:'Cinzel',serif;font-weight:700;letter-spacing:.25em;
+  text-align:center;font-size:14px;margin-bottom:4px;
+}
+.result-title.win{color:var(--moss)}
+.result-title.lose{color:var(--rose)}
+.result-msg{
+  font-family:'Gaegu',cursive;font-size:18px;text-align:center;
+  margin-bottom:16px;color:var(--ink);line-height:1.5;
+}
+
+/* Profile modal */
+.profile-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;
+}
+.stat-box{
+  background:rgba(200,151,56,.12);
+  border:1px dashed var(--gold);
+  border-radius:10px;
+  padding:10px 6px;text-align:center;
+}
+.stat-num{
+  font-family:'Cinzel',serif;font-weight:700;
+  font-size:22px;color:var(--magic);
+}
+.stat-label{font-size:10px;color:var(--ink-soft);letter-spacing:.1em}
+.clear-list{
+  max-height:280px;overflow-y:auto;
+  border:1px dashed rgba(58,39,24,.25);
+  border-radius:10px;padding:8px;
+}
+.clear-list-empty{
+  text-align:center;color:var(--ink-soft);
+  font-size:13px;padding:24px 12px;
+}
+.clear-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-radius:6px;font-size:12px;
+}
+.clear-row:nth-child(odd){background:rgba(255,255,255,.4)}
+.clear-row .ce-icon{font-size:16px}
+.clear-row .ce-title{flex:1;font-family:'Gaegu',cursive;font-weight:700;font-size:13px}
+.clear-row .ce-date{font-size:10px;color:var(--ink-soft);font-family:'Cinzel',serif;letter-spacing:.1em}
+
+@media (max-width:520px){
+  .word-list{grid-template-columns:1fr}
+  .char-grid{grid-template-columns:repeat(4,1fr)}
+  .node{width:90%}
+  .node-row{justify-content:center !important}
+  .title-main{font-size:32px}
+  .q-prompt{font-size:36px}
+  .q-prompt.en-mode{font-size:32px}
+  .map-header{flex-direction:column;align-items:stretch}
+  .progress-banner{justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- WELCOME SCREEN -->
+  <div id="welcomeScreen" class="screen active">
+    <div class="title">~ WORD QUEST ~</div>
+    <div class="title-main">단어의 탑</div>
+    <div class="title-sub">— 잃어버린 언어의 비밀을 찾아서 —</div>
+
+    <div class="card welcome-card">
+      <div class="welcome-art">🏰✨📖</div>
+      <div class="welcome-text">옛날 옛적, 모든 단어를 잃어버린 왕국이 있었어요.
+<strong>단어의 탑</strong> 꼭대기에 잠든 <strong>언어의 정령</strong>을 깨워야만
+사람들이 다시 말을 되찾을 수 있다고 하지요.
+
+용감한 여행자여, 50개의 시험을 통과하고
+탑의 꼭대기까지 올라가 줄래요?</div>
+
+      <div class="welcome-rules">
+        <div class="welcome-rules-title">✦ 모험의 규칙 ✦</div>
+        • 각 층마다 단어를 외우는 <b>시간</b>이 주어집니다.<br>
+        • 시간이 끝나면 <b>한국어 → 영어</b> 또는 <b>영어 → 한국어</b> 타이핑 시험이 시작돼요.<br>
+        • <b>🔊 발음 듣기</b> 버튼을 누르면 영어 단어를 들을 수 있어요.<br>
+        • 단 하나라도 틀리면 <b>처음부터</b> 다시 도전해야 해요.<br>
+        • 모든 단어를 맞추면 다음 층의 문이 열립니다.
+      </div>
+
+      <div class="char-prompt">✨ 동행할 모험가를 골라주세요 ✨</div>
+      <div class="char-grid" id="charGrid"></div>
+
+      <div class="btn-row">
+        <button class="btn magic" id="beginBtn" disabled>모험 시작하기 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP SCREEN -->
+  <div id="mapScreen" class="screen">
+    <div class="title">~ TOWER OF WORDS ~</div>
+    <div class="title-main">단어의 탑</div>
+
+    <div class="map-header">
+      <div class="me-pill" id="mePill" title="내 기록 보기">
+        <div class="me-emoji" id="meEmoji">🧙‍♀️</div>
+        <div>
+          <div class="me-name" id="meName">모험가</div>
+          <div class="me-action">VIEW PROFILE</div>
+        </div>
+      </div>
+      <div class="progress-banner">
+        <div class="progress-pill">⭐ 클리어 <span id="clearedCount">0</span> / 50</div>
+        <div class="progress-pill">📚 외운 단어 <span id="wordsLearned">0</span></div>
+        <div class="direction-toggle" id="dirToggle" title="시험 방향 전환">
+          <div class="dir-option active" data-dir="kr2en">🇰🇷→🇬🇧</div>
+          <div class="dir-option" data-dir="en2kr">🇬🇧→🇰🇷</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tower-map" id="towerMap"></div>
+    </div>
+  </div>
+
+  <!-- QUEST SCREEN -->
+  <div id="questScreen" class="screen">
+    <div class="quest-header">
+      <button class="quest-back" id="questBack">← 탑으로</button>
+      <div class="quest-info">
+        <div class="num" id="questNum">QUEST 01</div>
+        <div id="questTitle">시작의 그림자</div>
+      </div>
+      <div style="width:70px"></div>
+    </div>
+
+    <!-- Memorize phase -->
+    <div class="card phase-card" id="memorizePhase">
+      <div class="phase-label">PHASE I · MEMORIZE</div>
+      <div class="phase-title" id="memorizeTitle">단어를 외워주세요</div>
+      <div class="phase-desc">제한 시간 안에 모든 단어를 외워야 해요!</div>
+      <div class="timer" id="timer">01:00</div>
+      <div class="word-list" id="wordList"></div>
+      <div class="btn-row">
+        <button class="btn gold" id="skipMemorize">외웠어요! 시험 보기 →</button>
+      </div>
+    </div>
+
+    <!-- Test phase -->
+    <div class="card phase-card" id="testPhase" style="display:none">
+      <div class="phase-label">PHASE II · TRIAL</div>
+      <div class="q-counter" id="qCounter">QUESTION 1 / 10</div>
+      <div class="q-prompt" id="qPrompt">단어</div>
+      <input type="text" class="q-input" id="qInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="영단어를 입력...">
+      <div class="q-feedback" id="qFeedback"></div>
+      <div class="q-progress-bar"><div class="q-progress-fill" id="testProgress" style="width:0%"></div></div>
+      <div class="btn-row">
+        <button class="btn magic" id="submitAnswer">제출</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultOverlay">
+  <div class="modal">
+    <button class="modal-close" id="resultClose">×</button>
+    <div class="result-art" id="resultArt">🎉</div>
+    <div class="result-title" id="resultTitle">VICTORY</div>
+    <div class="result-msg" id="resultMsg">잘했어요!</div>
+    <div class="btn-row" id="resultBtns"></div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileOverlay">
+  <div class="modal">
+    <button class="modal-close" id="profileClose">×</button>
+    <div class="modal-title" id="profileName">모험가</div>
+    <div class="modal-sub">언어를 되찾는 여행자</div>
+    <div class="profile-stats">
+      <div class="stat-box"><div class="stat-num" id="psCleared">0</div><div class="stat-label">CLEARED</div></div>
+      <div class="stat-box"><div class="stat-num" id="psWords">0</div><div class="stat-label">WORDS</div></div>
+      <div class="stat-box"><div class="stat-num" id="psPercent">0%</div><div class="stat-label">PROGRESS</div></div>
+    </div>
+    <div class="clear-list" id="clearList"></div>
+    <div class="btn-row">
+      <button class="btn" id="resetBtn" style="background:var(--rose);box-shadow:0 4px 0 rgba(184,82,95,.5)">기록 초기화</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============== CHARACTERS ============== */
+const CHARACTERS = [
+  {id:'mage_g',emoji:'🧙‍♀️',name:'마법소녀'},
+  {id:'mermaid',emoji:'🧜‍♀️',name:'인어공주'},
+  {id:'elf_b',emoji:'🧝‍♂️',name:'엘프궁수'},
+  {id:'bard',emoji:'🎻',name:'음유시인'},
+  {id:'alchem',emoji:'⚗️',name:'별빛연금술사'},
+  {id:'knight',emoji:'🛡️',name:'은빛기사'},
+  {id:'witch',emoji:'🔮',name:'점성술사'},
+  {id:'fairy',emoji:'🧚',name:'요정'},
+  {id:'pirate',emoji:'🏴‍☠️',name:'바다해적'},
+  {id:'wolfboy',emoji:'🐺',name:'늑대소년'},
+  {id:'cat_g',emoji:'😺',name:'고양이마법사'},
+  {id:'dragon',emoji:'🐉',name:'용의기수'},
+  {id:'angel',emoji:'😇',name:'천사'},
+  {id:'vamp',emoji:'🧛',name:'뱀파이어'},
+  {id:'mage_b',emoji:'🧙‍♂️',name:'대마법사'},
+  {id:'princess',emoji:'👸',name:'공주'},
+  {id:'prince',emoji:'🤴',name:'왕자'},
+  {id:'monk',emoji:'🕊️',name:'은둔수도자'},
+  {id:'archer',emoji:'🏹',name:'사냥꾼'},
+  {id:'jester',emoji:'🃏',name:'궁정광대'},
+  {id:'detec',emoji:'🕵️',name:'밤의탐정'},
+  {id:'forest',emoji:'🌿',name:'숲의수호자'},
+  {id:'fox_g',emoji:'🦊',name:'여우정령'},
+  {id:'snowq',emoji:'❄️',name:'눈의여왕'},
+  {id:'sunb',emoji:'☀️',name:'태양의아이'},
+  {id:'rose',emoji:'🌹',name:'장미정원사'},
+  {id:'star_b',emoji:'⭐',name:'별을부르는자'},
+  {id:'owl',emoji:'🦉',name:'올빼미현자'},
+  {id:'tea',emoji:'🍵',name:'다도사'},
+  {id:'crow',emoji:'🦅',name:'까마귀학자'}
+];
+
+/* ============== QUESTS ============== */
+const QUESTS = [
+  /* === ELEMENTARY (Q1-15) - 25 words each === */
+  {id:1,title:'시작의 그림자',icon:'🌑',zone:'underground',level:'elementary',words:[
+    {kr:'나',en:'i'},{kr:'너',en:'you'},{kr:'그',en:'he'},{kr:'그녀',en:'she'},{kr:'우리',en:'we'},
+    {kr:'그들',en:'they'},{kr:'그것',en:'it'},{kr:'이것',en:'this'},{kr:'저것',en:'that'},{kr:'무엇',en:'what'},
+    {kr:'누구',en:'who'},{kr:'어디',en:'where'},{kr:'언제',en:'when'},{kr:'왜',en:'why'},{kr:'어떻게',en:'how'},
+    {kr:'나의',en:'my'},{kr:'너의',en:'your'},{kr:'그의',en:'his'},{kr:'우리의',en:'our'},{kr:'그들의',en:'their'},
+    {kr:'나를',en:'me'},{kr:'그를',en:'him'},{kr:'이것들',en:'these'},{kr:'저것들',en:'those'},{kr:'어느',en:'which'}
+  ]},
+  {id:2,title:'동굴의 인사',icon:'👋',zone:'underground',level:'elementary',words:[
+    {kr:'안녕(만남)',en:'hello'},{kr:'안녕(작별)',en:'bye'},{kr:'좋은',en:'good'},{kr:'아침',en:'morning'},{kr:'저녁',en:'evening'},
+    {kr:'밤',en:'night'},{kr:'감사',en:'thanks'},{kr:'미안',en:'sorry'},{kr:'네',en:'yes'},{kr:'아니오',en:'no'},
+    {kr:'안녕(hi)',en:'hi'},{kr:'잘 가',en:'goodbye'},{kr:'오후',en:'afternoon'},{kr:'부탁해요',en:'please'},{kr:'환영',en:'welcome'},
+    {kr:'괜찮은',en:'fine'},{kr:'좋아',en:'ok'},{kr:'이름',en:'name'},{kr:'나이',en:'age'},{kr:'만나다',en:'meet'},
+    {kr:'다시',en:'again'},{kr:'매우',en:'very'},{kr:'조금',en:'little'},{kr:'모두',en:'all'},{kr:'잘',en:'well'}
+  ]},
+  {id:3,title:'잊혀진 가족',icon:'👨‍👩‍👧',zone:'underground',level:'elementary',words:[
+    {kr:'어머니',en:'mother'},{kr:'아버지',en:'father'},{kr:'자매',en:'sister'},{kr:'형제',en:'brother'},{kr:'가족',en:'family'},
+    {kr:'아이',en:'child'},{kr:'아기',en:'baby'},{kr:'친구',en:'friend'},{kr:'사람',en:'person'},{kr:'집',en:'home'},
+    {kr:'아들',en:'son'},{kr:'딸',en:'daughter'},{kr:'남편',en:'husband'},{kr:'아내',en:'wife'},{kr:'삼촌',en:'uncle'},
+    {kr:'이모',en:'aunt'},{kr:'사촌',en:'cousin'},{kr:'할아버지',en:'grandfather'},{kr:'할머니',en:'grandmother'},{kr:'부모',en:'parent'},
+    {kr:'남자',en:'man'},{kr:'여자',en:'woman'},{kr:'소년',en:'boy'},{kr:'소녀',en:'girl'},{kr:'이웃',en:'neighbor'}
+  ]},
+  {id:4,title:'동굴의 짐승들',icon:'🐾',zone:'underground',level:'elementary',words:[
+    {kr:'고양이',en:'cat'},{kr:'개',en:'dog'},{kr:'새',en:'bird'},{kr:'물고기',en:'fish'},{kr:'소',en:'cow'},
+    {kr:'돼지',en:'pig'},{kr:'말(horse)',en:'horse'},{kr:'양',en:'sheep'},{kr:'쥐',en:'mouse'},{kr:'토끼',en:'rabbit'},
+    {kr:'사자',en:'lion'},{kr:'호랑이',en:'tiger'},{kr:'곰',en:'bear'},{kr:'여우',en:'fox'},{kr:'늑대',en:'wolf'},
+    {kr:'원숭이',en:'monkey'},{kr:'코끼리',en:'elephant'},{kr:'뱀',en:'snake'},{kr:'오리',en:'duck'},{kr:'닭',en:'chicken'},
+    {kr:'개구리',en:'frog'},{kr:'거북이',en:'turtle'},{kr:'사슴',en:'deer'},{kr:'다람쥐',en:'squirrel'},{kr:'나비',en:'butterfly'}
+  ]},
+  {id:5,title:'골렘의 몸',icon:'💪',zone:'underground',level:'elementary',words:[
+    {kr:'머리',en:'head'},{kr:'눈(eye)',en:'eye'},{kr:'코',en:'nose'},{kr:'입',en:'mouth'},{kr:'귀',en:'ear'},
+    {kr:'손',en:'hand'},{kr:'발',en:'foot'},{kr:'다리(leg)',en:'leg'},{kr:'팔',en:'arm'},{kr:'얼굴',en:'face'},
+    {kr:'머리카락',en:'hair'},{kr:'이(tooth)',en:'tooth'},{kr:'손가락',en:'finger'},{kr:'무릎',en:'knee'},{kr:'어깨',en:'shoulder'},
+    {kr:'목',en:'neck'},{kr:'등(back)',en:'back'},{kr:'심장',en:'heart'},{kr:'몸',en:'body'},{kr:'피부',en:'skin'},
+    {kr:'입술',en:'lip'},{kr:'혀',en:'tongue'},{kr:'가슴',en:'chest'},{kr:'배(복부)',en:'stomach'},{kr:'발가락',en:'toe'}
+  ]},
+  {id:6,title:'무지개 보석',icon:'🌈',zone:'underground',level:'elementary',words:[
+    {kr:'빨강',en:'red'},{kr:'파랑',en:'blue'},{kr:'노랑',en:'yellow'},{kr:'초록',en:'green'},{kr:'검정',en:'black'},
+    {kr:'흰색',en:'white'},{kr:'분홍',en:'pink'},{kr:'보라',en:'purple'},{kr:'주황',en:'orange'},{kr:'갈색',en:'brown'},
+    {kr:'회색',en:'gray'},{kr:'금색',en:'gold'},{kr:'은색',en:'silver'},{kr:'어두운',en:'dark'},{kr:'밝은(light)',en:'light'},
+    {kr:'화사한',en:'bright'},{kr:'색깔',en:'color'},{kr:'무지개',en:'rainbow'},{kr:'페인트',en:'paint'},{kr:'그리다',en:'draw'},
+    {kr:'짙은',en:'deep'},{kr:'옅은',en:'pale'},{kr:'빛나는',en:'shiny'},{kr:'염색하다',en:'dye'},{kr:'흐릿한',en:'dim'}
+  ]},
+  {id:7,title:'숫자의 비밀',icon:'🔢',zone:'underground',level:'elementary',words:[
+    {kr:'하나',en:'one'},{kr:'둘',en:'two'},{kr:'셋',en:'three'},{kr:'넷',en:'four'},{kr:'다섯',en:'five'},
+    {kr:'여섯',en:'six'},{kr:'일곱',en:'seven'},{kr:'여덟',en:'eight'},{kr:'아홉',en:'nine'},{kr:'열',en:'ten'},
+    {kr:'열하나',en:'eleven'},{kr:'열둘',en:'twelve'},{kr:'스물',en:'twenty'},{kr:'서른',en:'thirty'},{kr:'마흔',en:'forty'},
+    {kr:'백',en:'hundred'},{kr:'천',en:'thousand'},{kr:'첫째',en:'first'},{kr:'둘째(second)',en:'second'},{kr:'셋째',en:'third'},
+    {kr:'숫자',en:'number'},{kr:'영(zero)',en:'zero'},{kr:'절반',en:'half'},{kr:'두 배',en:'double'},{kr:'많은',en:'many'}
+  ]},
+  {id:8,title:'동굴의 식탁',icon:'🍞',zone:'underground',level:'elementary',words:[
+    {kr:'사과',en:'apple'},{kr:'빵',en:'bread'},{kr:'우유',en:'milk'},{kr:'물',en:'water'},{kr:'쌀',en:'rice'},
+    {kr:'계란',en:'egg'},{kr:'케이크',en:'cake'},{kr:'차(tea)',en:'tea'},{kr:'콩',en:'bean'},{kr:'옥수수',en:'corn'},
+    {kr:'고기',en:'meat'},{kr:'해산물',en:'seafood'},{kr:'과일',en:'fruit'},{kr:'채소',en:'vegetable'},{kr:'설탕',en:'sugar'},
+    {kr:'소금',en:'salt'},{kr:'버터',en:'butter'},{kr:'치즈',en:'cheese'},{kr:'주스',en:'juice'},{kr:'수프',en:'soup'},
+    {kr:'바나나',en:'banana'},{kr:'포도',en:'grape'},{kr:'딸기',en:'strawberry'},{kr:'당근',en:'carrot'},{kr:'감자',en:'potato'}
+  ]},
+  {id:9,title:'바람의 노래',icon:'🌬️',zone:'underground',level:'elementary',words:[
+    {kr:'해',en:'sun'},{kr:'비',en:'rain'},{kr:'눈(snow)',en:'snow'},{kr:'바람',en:'wind'},{kr:'구름',en:'cloud'},
+    {kr:'더운',en:'hot'},{kr:'추운',en:'cold'},{kr:'따뜻한',en:'warm'},{kr:'시원한',en:'cool'},{kr:'하늘',en:'sky'},
+    {kr:'날씨',en:'weather'},{kr:'폭풍',en:'storm'},{kr:'번개',en:'lightning'},{kr:'안개',en:'fog'},{kr:'얼음',en:'ice'},
+    {kr:'불',en:'fire'},{kr:'땅',en:'earth'},{kr:'달(moon)',en:'moon'},{kr:'별',en:'star'},{kr:'계절',en:'season'},
+    {kr:'봄',en:'spring'},{kr:'여름',en:'summer'},{kr:'가을',en:'autumn'},{kr:'겨울',en:'winter'},{kr:'천둥',en:'thunder'}
+  ]},
+  {id:10,title:'움직이는 그림자',icon:'🏃',zone:'underground',level:'elementary',words:[
+    {kr:'가다',en:'go'},{kr:'오다',en:'come'},{kr:'먹다',en:'eat'},{kr:'마시다',en:'drink'},{kr:'자다',en:'sleep'},
+    {kr:'깨다',en:'wake'},{kr:'보다(see)',en:'see'},{kr:'듣다',en:'hear'},{kr:'말하다',en:'speak'},{kr:'읽다',en:'read'},
+    {kr:'쓰다(글)',en:'write'},{kr:'달리다',en:'run'},{kr:'걷다',en:'walk'},{kr:'뛰다',en:'jump'},{kr:'앉다',en:'sit'},
+    {kr:'서다',en:'stand'},{kr:'가져가다',en:'take'},{kr:'주다',en:'give'},{kr:'만들다',en:'make'},{kr:'하다',en:'do'},
+    {kr:'가져오다',en:'bring'},{kr:'사다',en:'buy'},{kr:'팔다',en:'sell'},{kr:'열다',en:'open'},{kr:'닫다',en:'close'}
+  ]},
+  {id:11,title:'요정의 학교',icon:'🏫',zone:'forest',level:'elementary',words:[
+    {kr:'학교',en:'school'},{kr:'학생',en:'student'},{kr:'선생님',en:'teacher'},{kr:'책',en:'book'},{kr:'펜',en:'pen'},
+    {kr:'연필',en:'pencil'},{kr:'종이',en:'paper'},{kr:'책상',en:'desk'},{kr:'의자',en:'chair'},{kr:'교실',en:'classroom'},
+    {kr:'공부하다',en:'study'},{kr:'배우다',en:'learn'},{kr:'가르치다',en:'teach'},{kr:'수업',en:'lesson'},{kr:'숙제',en:'homework'},
+    {kr:'칠판',en:'board'},{kr:'지우개',en:'eraser'},{kr:'가방',en:'bag'},{kr:'도서관',en:'library'},{kr:'시험(test)',en:'test'},
+    {kr:'운동장',en:'playground'},{kr:'공책',en:'notebook'},{kr:'자(ruler)',en:'ruler'},{kr:'가위',en:'scissors'},{kr:'풀(glue)',en:'glue'}
+  ]},
+  {id:12,title:'나무 위의 집',icon:'🏠',zone:'forest',level:'elementary',words:[
+    {kr:'문(door)',en:'door'},{kr:'창문',en:'window'},{kr:'방',en:'room'},{kr:'부엌',en:'kitchen'},{kr:'침실',en:'bedroom'},
+    {kr:'욕실',en:'bathroom'},{kr:'거실',en:'living'},{kr:'정원',en:'garden'},{kr:'벽',en:'wall'},{kr:'지붕',en:'roof'},
+    {kr:'바닥',en:'floor'},{kr:'천장',en:'ceiling'},{kr:'계단',en:'stairs'},{kr:'소파',en:'sofa'},{kr:'침대',en:'bed'},
+    {kr:'식탁',en:'table'},{kr:'램프',en:'lamp'},{kr:'거울',en:'mirror'},{kr:'그림(picture)',en:'picture'},{kr:'열쇠',en:'key'},
+    {kr:'시계',en:'clock'},{kr:'냉장고',en:'fridge'},{kr:'차고',en:'garage'},{kr:'마당',en:'yard'},{kr:'굴뚝',en:'chimney'}
+  ]},
+  {id:13,title:'시간의 모래',icon:'⏳',zone:'forest',level:'elementary',words:[
+    {kr:'시간(time)',en:'time'},{kr:'날(day)',en:'day'},{kr:'주(week)',en:'week'},{kr:'달(month)',en:'month'},{kr:'년(year)',en:'year'},
+    {kr:'오늘',en:'today'},{kr:'어제',en:'yesterday'},{kr:'내일',en:'tomorrow'},{kr:'지금',en:'now'},{kr:'나중에',en:'later'},
+    {kr:'시(hour)',en:'hour'},{kr:'분',en:'minute'},{kr:'초',en:'second'},{kr:'일찍',en:'early'},{kr:'늦은',en:'late'},
+    {kr:'곧',en:'soon'},{kr:'전에',en:'before'},{kr:'후에',en:'after'},{kr:'주말',en:'weekend'},{kr:'평일',en:'weekday'},
+    {kr:'새벽',en:'dawn'},{kr:'정오',en:'noon'},{kr:'자정',en:'midnight'},{kr:'항상',en:'always'},{kr:'절대',en:'never'}
+  ]},
+  {id:14,title:'반대의 숲',icon:'⚖️',zone:'forest',level:'elementary',words:[
+    {kr:'큰',en:'big'},{kr:'작은',en:'small'},{kr:'긴',en:'long'},{kr:'짧은',en:'short'},{kr:'새로운',en:'new'},
+    {kr:'오래된',en:'old'},{kr:'좋은(nice)',en:'nice'},{kr:'나쁜',en:'bad'},{kr:'행복한',en:'happy'},{kr:'슬픈',en:'sad'},
+    {kr:'키 큰',en:'tall'},{kr:'낮은',en:'low'},{kr:'빠른',en:'fast'},{kr:'느린',en:'slow'},{kr:'쉬운',en:'easy'},
+    {kr:'어려운',en:'hard'},{kr:'강한',en:'strong'},{kr:'약한',en:'weak'},{kr:'깨끗한',en:'clean'},{kr:'더러운',en:'dirty'},
+    {kr:'가득한',en:'full'},{kr:'텅 빈',en:'empty'},{kr:'무거운',en:'heavy'},{kr:'가벼운',en:'light'},{kr:'시끄러운',en:'loud'}
+  ]},
+  {id:15,title:'요정의 정원',icon:'🌳',zone:'forest',level:'elementary',words:[
+    {kr:'나무',en:'tree'},{kr:'꽃',en:'flower'},{kr:'풀(grass)',en:'grass'},{kr:'강',en:'river'},{kr:'산',en:'mountain'},
+    {kr:'바다',en:'sea'},{kr:'호수',en:'lake'},{kr:'숲',en:'forest'},{kr:'섬',en:'island'},{kr:'돌',en:'stone'},
+    {kr:'잎',en:'leaf'},{kr:'뿌리',en:'root'},{kr:'가지(branch)',en:'branch'},{kr:'씨앗',en:'seed'},{kr:'들판',en:'field'},
+    {kr:'계곡',en:'valley'},{kr:'언덕',en:'hill'},{kr:'해변',en:'beach'},{kr:'모래',en:'sand'},{kr:'바위',en:'rock'},
+    {kr:'강가',en:'shore'},{kr:'폭포',en:'waterfall'},{kr:'동굴',en:'cave'},{kr:'사막(desert)',en:'desert'},{kr:'늪',en:'swamp'}
+  ]},
+
+  /* === MIDDLE (Q16-30) - 30 words each === */
+  {id:16,title:'떠나는 길',icon:'✈️',zone:'forest',level:'middle',words:[
+    {kr:'여행',en:'travel'},{kr:'공항',en:'airport'},{kr:'비행기',en:'airplane'},{kr:'기차',en:'train'},{kr:'버스',en:'bus'},
+    {kr:'호텔',en:'hotel'},{kr:'여권',en:'passport'},{kr:'짐',en:'luggage'},{kr:'도착하다',en:'arrive'},{kr:'떠나다',en:'depart'},
+    {kr:'방문하다',en:'visit'},{kr:'관광(tour)',en:'tour'},{kr:'여정',en:'journey'},{kr:'목적지',en:'destination'},{kr:'표',en:'ticket'},
+    {kr:'정거장',en:'station'},{kr:'항구',en:'port'},{kr:'배(ship)',en:'ship'},{kr:'탑승하다',en:'board'},{kr:'출구',en:'exit'},
+    {kr:'입구',en:'entrance'},{kr:'로비',en:'lobby'},{kr:'여행가방',en:'suitcase'},{kr:'배낭',en:'backpack'},{kr:'휴가',en:'holiday'},
+    {kr:'방학',en:'vacation'},{kr:'해외',en:'abroad'},{kr:'외국의',en:'foreign'},{kr:'현지의',en:'local'},{kr:'항공편',en:'flight'}
+  ]},
+  {id:17,title:'마음의 색',icon:'💖',zone:'forest',level:'middle',words:[
+    {kr:'흥분한',en:'excited'},{kr:'긴장된',en:'nervous'},{kr:'외로운',en:'lonely'},{kr:'자랑스러운',en:'proud'},{kr:'부끄러운',en:'shy'},
+    {kr:'화난',en:'angry'},{kr:'놀란',en:'surprised'},{kr:'두려운',en:'afraid'},{kr:'평화로운',en:'peaceful'},{kr:'감사한',en:'grateful'},
+    {kr:'기쁜',en:'joyful'},{kr:'비참한',en:'miserable'},{kr:'불안한',en:'anxious'},{kr:'침착한',en:'calm'},{kr:'혼란스러운',en:'confused'},
+    {kr:'질투하는',en:'jealous'},{kr:'지루한',en:'bored'},{kr:'호기심 많은',en:'curious'},{kr:'만족한',en:'content'},{kr:'좌절한',en:'frustrated'},
+    {kr:'당황한',en:'embarrassed'},{kr:'실망한',en:'disappointed'},{kr:'희망찬',en:'hopeful'},{kr:'무서워하는',en:'fearful'},{kr:'만족스러운',en:'satisfied'},
+    {kr:'후회하는',en:'regretful'},{kr:'낙관적인',en:'optimistic'},{kr:'비관적인',en:'pessimistic'},{kr:'명랑한',en:'cheerful'},{kr:'우울한',en:'gloomy'}
+  ]},
+  {id:18,title:'길드의 직업',icon:'💼',zone:'forest',level:'middle',words:[
+    {kr:'의사',en:'doctor'},{kr:'간호사',en:'nurse'},{kr:'경찰',en:'police'},{kr:'소방관',en:'firefighter'},{kr:'변호사',en:'lawyer'},
+    {kr:'농부',en:'farmer'},{kr:'요리사',en:'chef'},{kr:'가수',en:'singer'},{kr:'화가',en:'painter'},{kr:'작가',en:'writer'},
+    {kr:'공학자',en:'engineer'},{kr:'과학자',en:'scientist'},{kr:'교수',en:'professor'},{kr:'치과의사',en:'dentist'},{kr:'건축가',en:'architect'},
+    {kr:'기자',en:'journalist'},{kr:'디자이너',en:'designer'},{kr:'사진작가',en:'photographer'},{kr:'배우',en:'actor'},{kr:'댄서',en:'dancer'},
+    {kr:'조종사',en:'pilot'},{kr:'선원',en:'sailor'},{kr:'군인',en:'soldier'},{kr:'판사',en:'judge'},{kr:'은행원',en:'banker'},
+    {kr:'기계공',en:'mechanic'},{kr:'배관공',en:'plumber'},{kr:'제빵사',en:'baker'},{kr:'목수',en:'carpenter'},{kr:'사서',en:'librarian'}
+  ]},
+  {id:19,title:'경기장의 함성',icon:'⚽',zone:'forest',level:'middle',words:[
+    {kr:'축구',en:'soccer'},{kr:'야구',en:'baseball'},{kr:'농구',en:'basketball'},{kr:'수영',en:'swimming'},{kr:'달리기',en:'running'},
+    {kr:'등산',en:'hiking'},{kr:'자전거',en:'bicycle'},{kr:'체육관',en:'gym'},{kr:'운동선수',en:'athlete'},{kr:'경기',en:'match'},
+    {kr:'테니스',en:'tennis'},{kr:'골프',en:'golf'},{kr:'권투',en:'boxing'},{kr:'스케이팅',en:'skating'},{kr:'스키',en:'skiing'},
+    {kr:'서핑',en:'surfing'},{kr:'클라이밍',en:'climbing'},{kr:'마라톤',en:'marathon'},{kr:'경주',en:'race'},{kr:'팀',en:'team'},
+    {kr:'선수',en:'player'},{kr:'코치',en:'coach'},{kr:'심판',en:'referee'},{kr:'점수',en:'score'},{kr:'골(goal)',en:'goal'},
+    {kr:'승리',en:'victory'},{kr:'패배',en:'defeat'},{kr:'챔피언',en:'champion'},{kr:'메달',en:'medal'},{kr:'트로피',en:'trophy'}
+  ]},
+  {id:20,title:'마법기계의 방',icon:'💻',zone:'forest',level:'middle',words:[
+    {kr:'컴퓨터',en:'computer'},{kr:'휴대폰',en:'phone'},{kr:'인터넷',en:'internet'},{kr:'화면',en:'screen'},{kr:'키보드',en:'keyboard'},
+    {kr:'마우스(device)',en:'mouse'},{kr:'비밀번호',en:'password'},{kr:'다운로드',en:'download'},{kr:'업로드',en:'upload'},{kr:'메시지',en:'message'},
+    {kr:'소프트웨어',en:'software'},{kr:'하드웨어',en:'hardware'},{kr:'애플리케이션',en:'application'},{kr:'웹사이트',en:'website'},{kr:'브라우저',en:'browser'},
+    {kr:'검색하다',en:'search'},{kr:'이메일',en:'email'},{kr:'파일',en:'file'},{kr:'폴더',en:'folder'},{kr:'클릭하다',en:'click'},
+    {kr:'버튼',en:'button'},{kr:'네트워크',en:'network'},{kr:'신호',en:'signal'},{kr:'배터리',en:'battery'},{kr:'충전기',en:'charger'},
+    {kr:'카메라',en:'camera'},{kr:'비디오',en:'video'},{kr:'온라인',en:'online'},{kr:'오프라인',en:'offline'},{kr:'알림',en:'notification'}
+  ]},
+  {id:21,title:'숲의 약속',icon:'🌿',zone:'hills',level:'middle',words:[
+    {kr:'환경',en:'environment'},{kr:'오염',en:'pollution'},{kr:'재활용하다',en:'recycle'},{kr:'쓰레기',en:'garbage'},{kr:'자연',en:'nature'},
+    {kr:'보호하다',en:'protect'},{kr:'동물',en:'animal'},{kr:'식물',en:'plant'},{kr:'멸종된',en:'extinct'},{kr:'기후',en:'climate'},
+    {kr:'야생',en:'wildlife'},{kr:'서식지',en:'habitat'},{kr:'종(species)',en:'species'},{kr:'위기에 처한',en:'endangered'},{kr:'대기',en:'atmosphere'},
+    {kr:'산소',en:'oxygen'},{kr:'탄소',en:'carbon'},{kr:'배출',en:'emission'},{kr:'폐기물',en:'waste'},{kr:'플라스틱',en:'plastic'},
+    {kr:'유기농의',en:'organic'},{kr:'지속가능한',en:'sustainable'},{kr:'친환경적인',en:'eco-friendly'},{kr:'보존',en:'conservation'},{kr:'보존하다',en:'preserve'},
+    {kr:'생물다양성',en:'biodiversity'},{kr:'가뭄',en:'drought'},{kr:'홍수',en:'flood'},{kr:'재해',en:'disaster'},{kr:'태양의',en:'solar'}
+  ]},
+  {id:22,title:'치유의 샘',icon:'💊',zone:'hills',level:'middle',words:[
+    {kr:'건강',en:'health'},{kr:'질병(disease)',en:'disease'},{kr:'약',en:'medicine'},{kr:'운동(exercise)',en:'exercise'},{kr:'잠',en:'sleep'},
+    {kr:'휴식',en:'rest'},{kr:'영양',en:'nutrition'},{kr:'위생',en:'hygiene'},{kr:'검진',en:'checkup'},{kr:'고통',en:'pain'},
+    {kr:'병원',en:'hospital'},{kr:'환자',en:'patient'},{kr:'치료',en:'treatment'},{kr:'수술',en:'surgery'},{kr:'질환',en:'illness'},
+    {kr:'부상',en:'injury'},{kr:'상처',en:'wound'},{kr:'치유',en:'cure'},{kr:'낫다',en:'heal'},{kr:'열(fever)',en:'fever'},
+    {kr:'기침',en:'cough'},{kr:'두통',en:'headache'},{kr:'알레르기',en:'allergy'},{kr:'비타민',en:'vitamin'},{kr:'칼로리',en:'calorie'},
+    {kr:'체력',en:'fitness'},{kr:'스트레스',en:'stress'},{kr:'긴장을 풀다',en:'relax'},{kr:'호흡하다',en:'breathe'},{kr:'증상',en:'symptom'}
+  ]},
+  {id:23,title:'대화의 다리',icon:'💬',zone:'hills',level:'middle',words:[
+    {kr:'대화',en:'conversation'},{kr:'토론(discussion)',en:'discussion'},{kr:'의견',en:'opinion'},{kr:'동의하다',en:'agree'},{kr:'반대하다',en:'disagree'},
+    {kr:'설명하다',en:'explain'},{kr:'질문',en:'question'},{kr:'답변',en:'answer'},{kr:'약속',en:'promise'},{kr:'거짓말',en:'lie'},
+    {kr:'논쟁하다',en:'argue'},{kr:'토론하다',en:'debate'},{kr:'협상하다',en:'negotiate'},{kr:'설득하다',en:'persuade'},{kr:'납득시키다',en:'convince'},
+    {kr:'제안하다',en:'suggest'},{kr:'조언하다',en:'advise'},{kr:'추천하다',en:'recommend'},{kr:'요청하다',en:'request'},{kr:'요구하다',en:'demand'},
+    {kr:'수락하다',en:'accept'},{kr:'거절하다',en:'refuse'},{kr:'언급하다',en:'mention'},{kr:'표현하다',en:'express'},{kr:'의사소통하다',en:'communicate'},
+    {kr:'응답하다',en:'respond'},{kr:'반응하다',en:'react'},{kr:'끼어들다',en:'interrupt'},{kr:'속삭이다',en:'whisper'},{kr:'외치다',en:'shout'}
+  ]},
+  {id:24,title:'시민의 광장',icon:'🏛️',zone:'hills',level:'middle',words:[
+    {kr:'사회',en:'society'},{kr:'공동체',en:'community'},{kr:'문화',en:'culture'},{kr:'전통',en:'tradition'},{kr:'역사',en:'history'},
+    {kr:'정부',en:'government'},{kr:'법(law)',en:'law'},{kr:'권리',en:'right'},{kr:'의무',en:'duty'},{kr:'시민',en:'citizen'},
+    {kr:'국가',en:'nation'},{kr:'나라',en:'country'},{kr:'주(state)',en:'state'},{kr:'수도(capital city)',en:'capital'},{kr:'지도자',en:'leader'},
+    {kr:'선거',en:'election'},{kr:'투표',en:'vote'},{kr:'공공의',en:'public'},{kr:'사적인',en:'private'},{kr:'사회적인',en:'social'},
+    {kr:'정치적인',en:'political'},{kr:'경제적인',en:'economic'},{kr:'문화적인',en:'cultural'},{kr:'세대',en:'generation'},{kr:'인구',en:'population'},
+    {kr:'이민자',en:'immigrant'},{kr:'다양한',en:'diverse'},{kr:'평등한',en:'equal'},{kr:'세계적인',en:'global'},{kr:'지역의',en:'regional'}
+  ]},
+  {id:25,title:'배움의 탑',icon:'🎓',zone:'hills',level:'middle',words:[
+    {kr:'교육',en:'education'},{kr:'지식',en:'knowledge'},{kr:'정보',en:'information'},{kr:'연구',en:'research'},{kr:'실험',en:'experiment'},
+    {kr:'발표',en:'presentation'},{kr:'시험(exam)',en:'exam'},{kr:'성적',en:'grade'},{kr:'졸업하다',en:'graduate'},{kr:'학위',en:'degree'},
+    {kr:'대학교',en:'university'},{kr:'단과대학',en:'college'},{kr:'강사',en:'lecturer'},{kr:'강의',en:'lecture'},{kr:'과정',en:'course'},
+    {kr:'과목',en:'subject'},{kr:'학기',en:'semester'},{kr:'논문',en:'thesis'},{kr:'에세이',en:'essay'},{kr:'과제',en:'assignment'},
+    {kr:'마감',en:'deadline'},{kr:'장학금',en:'scholarship'},{kr:'등록금',en:'tuition'},{kr:'교과과정',en:'curriculum'},{kr:'학문적인',en:'academic'},
+    {kr:'지적인',en:'intellectual'},{kr:'이론(theory)',en:'theory'},{kr:'캠퍼스',en:'campus'},{kr:'동아리',en:'club'},{kr:'등록',en:'enrollment'}
+  ]},
+  {id:26,title:'상인의 광장',icon:'💰',zone:'hills',level:'middle',words:[
+    {kr:'사업',en:'business'},{kr:'회사',en:'company'},{kr:'직원',en:'employee'},{kr:'봉급',en:'salary'},{kr:'회의',en:'meeting'},
+    {kr:'거래',en:'deal'},{kr:'이익',en:'profit'},{kr:'손실',en:'loss'},{kr:'광고',en:'advertisement'},{kr:'시장(market)',en:'market'},
+    {kr:'관리자',en:'manager'},{kr:'고객',en:'customer'},{kr:'의뢰인',en:'client'},{kr:'제품',en:'product'},{kr:'서비스',en:'service'},
+    {kr:'브랜드',en:'brand'},{kr:'가격',en:'price'},{kr:'비용',en:'cost'},{kr:'예산',en:'budget'},{kr:'금융',en:'finance'},
+    {kr:'투자자',en:'investor'},{kr:'동업자',en:'partner'},{kr:'계약',en:'contract'},{kr:'합의',en:'agreement'},{kr:'전략',en:'strategy'},
+    {kr:'경쟁',en:'competition'},{kr:'산업',en:'industry'},{kr:'성장',en:'growth'},{kr:'확장',en:'expansion'},{kr:'수익',en:'revenue'}
+  ]},
+  {id:27,title:'대탐험의 길',icon:'🗺️',zone:'hills',level:'middle',words:[
+    {kr:'모험',en:'adventure'},{kr:'탐험(noun)',en:'exploration'},{kr:'풍경',en:'scenery'},{kr:'기념품',en:'souvenir'},{kr:'관광업',en:'tourism'},
+    {kr:'안내자',en:'guide'},{kr:'지도',en:'map'},{kr:'일정',en:'schedule'},{kr:'예약',en:'reservation'},{kr:'출입국',en:'immigration'},
+    {kr:'탐험하다',en:'explore'},{kr:'발견하다',en:'discover'},{kr:'발견',en:'discovery'},{kr:'원정',en:'expedition'},{kr:'임무',en:'mission'},
+    {kr:'길(route)',en:'route'},{kr:'오솔길',en:'path'},{kr:'산책로',en:'trail'},{kr:'나침반',en:'compass'},{kr:'항해하다',en:'navigate'},
+    {kr:'영토',en:'territory'},{kr:'지역',en:'region'},{kr:'위치',en:'location'},{kr:'명소',en:'landmark'},{kr:'기념물',en:'monument'},
+    {kr:'관광명소',en:'attraction'},{kr:'경이로움',en:'wonder'},{kr:'낙원',en:'paradise'},{kr:'야생의',en:'wild'},{kr:'외딴',en:'remote'}
+  ]},
+  {id:28,title:'예술의 갤러리',icon:'🎨',zone:'hills',level:'middle',words:[
+    {kr:'예술',en:'art'},{kr:'음악',en:'music'},{kr:'미술',en:'painting'},{kr:'문학',en:'literature'},{kr:'영화',en:'film'},
+    {kr:'박물관',en:'museum'},{kr:'갤러리',en:'gallery'},{kr:'콘서트',en:'concert'},{kr:'공연',en:'performance'},{kr:'감상하다',en:'appreciate'},
+    {kr:'예술가',en:'artist'},{kr:'창작자',en:'creator'},{kr:'걸작',en:'masterpiece'},{kr:'전시회',en:'exhibition'},{kr:'관객',en:'audience'},
+    {kr:'무대',en:'stage'},{kr:'극장',en:'theater'},{kr:'드라마',en:'drama'},{kr:'코미디',en:'comedy'},{kr:'비극',en:'tragedy'},
+    {kr:'악기',en:'instrument'},{kr:'노래',en:'song'},{kr:'가사',en:'lyric'},{kr:'리듬',en:'rhythm'},{kr:'박자',en:'beat'},
+    {kr:'축제',en:'festival'},{kr:'의식(ceremony)',en:'ceremony'},{kr:'축하하다',en:'celebrate'},{kr:'공연하다',en:'perform'},{kr:'창작하다',en:'create'}
+  ]},
+  {id:29,title:'미식의 부엌',icon:'🍳',zone:'hills',level:'middle',words:[
+    {kr:'영양소',en:'nutrient'},{kr:'단백질',en:'protein'},{kr:'탄수화물',en:'carbohydrate'},{kr:'지방',en:'fat'},{kr:'식단',en:'diet'},
+    {kr:'채식주의자',en:'vegetarian'},{kr:'디저트',en:'dessert'},{kr:'양념',en:'seasoning'},{kr:'조리법',en:'recipe'},{kr:'발효',en:'fermentation'},
+    {kr:'재료',en:'ingredient'},{kr:'풍미',en:'flavor'},{kr:'맛',en:'taste'},{kr:'단(sweet)',en:'sweet'},{kr:'신(sour)',en:'sour'},
+    {kr:'쓴',en:'bitter'},{kr:'짠',en:'salty'},{kr:'매운',en:'spicy'},{kr:'신선한',en:'fresh'},{kr:'익은',en:'ripe'},
+    {kr:'날것의',en:'raw'},{kr:'요리된',en:'cooked'},{kr:'튀긴',en:'fried'},{kr:'구운(빵)',en:'baked'},{kr:'삶은',en:'boiled'},
+    {kr:'그릴에 구운',en:'grilled'},{kr:'로스트한',en:'roasted'},{kr:'찐',en:'steamed'},{kr:'얇게 썬',en:'sliced'},{kr:'잘게 썬',en:'chopped'}
+  ]},
+  {id:30,title:'성장의 언덕',icon:'🌱',zone:'hills',level:'middle',words:[
+    {kr:'목표',en:'goal'},{kr:'도전',en:'challenge'},{kr:'노력',en:'effort'},{kr:'성공',en:'success'},{kr:'실패',en:'failure'},
+    {kr:'인내',en:'patience'},{kr:'자신감',en:'confidence'},{kr:'동기',en:'motivation'},{kr:'습관',en:'habit'},{kr:'성장(personal)',en:'growth'},
+    {kr:'성취하다',en:'achieve'},{kr:'완수하다',en:'accomplish'},{kr:'향상시키다',en:'improve'},{kr:'발전시키다',en:'develop'},{kr:'진보',en:'progress'},
+    {kr:'업적',en:'achievement'},{kr:'성취(noun)',en:'accomplishment'},{kr:'헌신',en:'dedication'},{kr:'끈기',en:'persistence'},{kr:'결단력',en:'determination'},
+    {kr:'야망',en:'ambition'},{kr:'열망',en:'aspiration'},{kr:'영감',en:'inspiration'},{kr:'격려',en:'encouragement'},{kr:'의지력',en:'willpower'},
+    {kr:'규율',en:'discipline'},{kr:'집중',en:'focus'},{kr:'태도',en:'attitude'},{kr:'사고방식',en:'mindset'},{kr:'잠재력',en:'potential'}
+  ]},
+
+  /* === HIGH SCHOOL (Q31-50) - 35 words each === */
+  {id:31,title:'왕의 의회',icon:'👑',zone:'castle',level:'high',words:[
+    {kr:'민주주의',en:'democracy'},{kr:'선거(election)',en:'election'},{kr:'대통령',en:'president'},{kr:'정책',en:'policy'},{kr:'외교',en:'diplomacy'},
+    {kr:'협상',en:'negotiation'},{kr:'동맹',en:'alliance'},{kr:'분쟁',en:'conflict'},{kr:'평화',en:'peace'},{kr:'안보',en:'security'},
+    {kr:'의회',en:'parliament'},{kr:'국회',en:'congress'},{kr:'상원의원',en:'senator'},{kr:'장관',en:'minister'},{kr:'대사',en:'ambassador'},
+    {kr:'대사관',en:'embassy'},{kr:'조약',en:'treaty'},{kr:'제재',en:'sanction'},{kr:'주권',en:'sovereignty'},{kr:'자치',en:'autonomy'},
+    {kr:'정권',en:'regime'},{kr:'독재자',en:'dictator'},{kr:'군주제',en:'monarchy'},{kr:'공화국',en:'republic'},{kr:'이념',en:'ideology'},
+    {kr:'선전(propaganda)',en:'propaganda'},{kr:'규제',en:'regulation'},{kr:'입법',en:'legislation'},{kr:'수정안',en:'amendment'},{kr:'관할권',en:'jurisdiction'},
+    {kr:'반대파',en:'opposition'},{kr:'연합',en:'coalition'},{kr:'국민투표',en:'referendum'},{kr:'캠페인',en:'campaign'},{kr:'후보자',en:'candidate'}
+  ]},
+  {id:32,title:'황금의 시장',icon:'📈',zone:'castle',level:'high',words:[
+    {kr:'경제',en:'economy'},{kr:'통화',en:'currency'},{kr:'환율',en:'exchange'},{kr:'금리',en:'interest'},{kr:'인플레이션',en:'inflation'},
+    {kr:'주식',en:'stock'},{kr:'투자',en:'investment'},{kr:'자본',en:'capital'},{kr:'수요',en:'demand'},{kr:'공급',en:'supply'},
+    {kr:'자산',en:'asset'},{kr:'부채',en:'liability'},{kr:'주식자본',en:'equity'},{kr:'배당금',en:'dividend'},{kr:'담보대출',en:'mortgage'},
+    {kr:'경기침체',en:'recession'},{kr:'적자',en:'deficit'},{kr:'흑자',en:'surplus'},{kr:'총계의',en:'gross'},{kr:'생산성',en:'productivity'},
+    {kr:'독점',en:'monopoly'},{kr:'관세',en:'tariff'},{kr:'보조금',en:'subsidy'},{kr:'재정의',en:'fiscal'},{kr:'통화의',en:'monetary'},
+    {kr:'채권',en:'bond'},{kr:'파생상품',en:'derivative'},{kr:'헤지',en:'hedge'},{kr:'레버리지',en:'leverage'},{kr:'평가(value)',en:'valuation'},
+    {kr:'감가상각',en:'depreciation'},{kr:'평가절상',en:'appreciation'},{kr:'상업',en:'commerce'},{kr:'무역',en:'trade'},{kr:'경제학자',en:'economist'}
+  ]},
+  {id:33,title:'과학자의 실험실',icon:'🔬',zone:'castle',level:'high',words:[
+    {kr:'가설',en:'hypothesis'},{kr:'이론(theory)',en:'theory'},{kr:'분자',en:'molecule'},{kr:'원자',en:'atom'},{kr:'진화',en:'evolution'},
+    {kr:'유전자',en:'gene'},{kr:'화학',en:'chemistry'},{kr:'물리학',en:'physics'},{kr:'생물학',en:'biology'},{kr:'천문학',en:'astronomy'},
+    {kr:'방정식',en:'equation'},{kr:'공식',en:'formula'},{kr:'입자',en:'particle'},{kr:'전자',en:'electron'},{kr:'양성자',en:'proton'},
+    {kr:'중성자',en:'neutron'},{kr:'원소',en:'element'},{kr:'화합물',en:'compound'},{kr:'반응',en:'reaction'},{kr:'촉매',en:'catalyst'},
+    {kr:'유기체',en:'organism'},{kr:'세포',en:'cell'},{kr:'조직(tissue)',en:'tissue'},{kr:'기관(organ)',en:'organ'},{kr:'광합성',en:'photosynthesis'},
+    {kr:'생태계',en:'ecosystem'},{kr:'중력',en:'gravity'},{kr:'속도(velocity)',en:'velocity'},{kr:'가속도',en:'acceleration'},{kr:'마찰',en:'friction'},
+    {kr:'자성',en:'magnetism'},{kr:'복사선',en:'radiation'},{kr:'주파수',en:'frequency'},{kr:'파장',en:'wavelength'},{kr:'은하',en:'galaxy'}
+  ]},
+  {id:34,title:'철학자의 서재',icon:'📜',zone:'castle',level:'high',words:[
+    {kr:'철학',en:'philosophy'},{kr:'윤리',en:'ethics'},{kr:'도덕',en:'morality'},{kr:'정의',en:'justice'},{kr:'진리',en:'truth'},
+    {kr:'자유',en:'freedom'},{kr:'평등',en:'equality'},{kr:'존재',en:'existence'},{kr:'의식(consciousness)',en:'consciousness'},{kr:'합리적인',en:'rational'},
+    {kr:'논리',en:'logic'},{kr:'이성',en:'reason'},{kr:'미덕',en:'virtue'},{kr:'악덕',en:'vice'},{kr:'원칙',en:'principle'},
+    {kr:'가치',en:'value'},{kr:'신념',en:'belief'},{kr:'교리',en:'doctrine'},{kr:'도그마',en:'dogma'},{kr:'역설',en:'paradox'},
+    {kr:'딜레마',en:'dilemma'},{kr:'형이상학',en:'metaphysics'},{kr:'존재론',en:'ontology'},{kr:'인식론',en:'epistemology'},{kr:'변증법',en:'dialectic'},
+    {kr:'회의주의',en:'skepticism'},{kr:'관념론',en:'idealism'},{kr:'유물론',en:'materialism'},{kr:'실용주의',en:'pragmatism'},{kr:'허무주의',en:'nihilism'},
+    {kr:'쾌락주의',en:'hedonism'},{kr:'스토아주의',en:'stoicism'},{kr:'경험적인',en:'empirical'},{kr:'연역',en:'deduction'},{kr:'지혜',en:'wisdom'}
+  ]},
+  {id:35,title:'마음의 미궁',icon:'🧠',zone:'castle',level:'high',words:[
+    {kr:'인식',en:'perception'},{kr:'인지',en:'cognition'},{kr:'행동',en:'behavior'},{kr:'정서',en:'emotion'},{kr:'본능',en:'instinct'},
+    {kr:'무의식',en:'unconscious'},{kr:'트라우마',en:'trauma'},{kr:'치료법',en:'therapy'},{kr:'우울',en:'depression'},{kr:'불안',en:'anxiety'},
+    {kr:'정신의',en:'mental'},{kr:'뇌',en:'brain'},{kr:'기억',en:'memory'},{kr:'주의(attention)',en:'attention'},{kr:'자각',en:'awareness'},
+    {kr:'직관',en:'intuition'},{kr:'성격',en:'personality'},{kr:'기질',en:'temperament'},{kr:'편견',en:'prejudice'},{kr:'고정관념',en:'stereotype'},
+    {kr:'공감',en:'empathy'},{kr:'연민',en:'compassion'},{kr:'신경증의',en:'neurotic'},{kr:'장애',en:'disorder'},{kr:'중독',en:'addiction'},
+    {kr:'공포증',en:'phobia'},{kr:'억압하다',en:'repress'},{kr:'투사',en:'projection'},{kr:'부정(denial)',en:'denial'},{kr:'조건화',en:'conditioning'},
+    {kr:'반사',en:'reflex'},{kr:'기분',en:'mood'},{kr:'내향적인',en:'introvert'},{kr:'외향적인',en:'extrovert'},{kr:'충동적인',en:'impulsive'}
+  ]},
+  {id:36,title:'대지의 외침',icon:'🌍',zone:'castle',level:'high',words:[
+    {kr:'사막화',en:'desertification'},{kr:'침식',en:'erosion'},{kr:'살충제',en:'pesticide'},{kr:'오염(contamination)',en:'contamination'},{kr:'매립지',en:'landfill'},
+    {kr:'퇴비',en:'compost'},{kr:'생분해성의',en:'biodegradable'},{kr:'원자력의',en:'nuclear'},{kr:'수력의',en:'hydroelectric'},{kr:'지열의',en:'geothermal'},
+    {kr:'온실',en:'greenhouse'},{kr:'화석',en:'fossil'},{kr:'재생가능한',en:'renewable'},{kr:'멸종(extinction)',en:'extinction'},{kr:'토양',en:'soil'},
+    {kr:'오존',en:'ozone'},{kr:'대류권',en:'troposphere'},{kr:'성층권',en:'stratosphere'},{kr:'산성',en:'acidic'},{kr:'영구동토',en:'permafrost'},
+    {kr:'툰드라',en:'tundra'},{kr:'열대우림',en:'rainforest'},{kr:'산호',en:'coral'},{kr:'해양의',en:'marine'},{kr:'육지의',en:'terrestrial'},
+    {kr:'수중의',en:'aquatic'},{kr:'생태학',en:'ecology'},{kr:'생물군계',en:'biome'},{kr:'임관',en:'canopy'},{kr:'침입성의',en:'invasive'},
+    {kr:'풍토의',en:'endemic'},{kr:'자원',en:'resource'},{kr:'고갈',en:'depletion'},{kr:'지속가능성',en:'sustainability'},{kr:'환경운동가',en:'environmentalist'}
+  ]},
+  {id:37,title:'정의의 법정',icon:'⚖️',zone:'castle',level:'high',words:[
+    {kr:'헌법',en:'constitution'},{kr:'법정',en:'court'},{kr:'판결',en:'verdict'},{kr:'변호',en:'defense'},{kr:'증거',en:'evidence'},
+    {kr:'증인',en:'witness'},{kr:'무죄의',en:'innocent'},{kr:'유죄의',en:'guilty'},{kr:'형벌',en:'punishment'},{kr:'항소',en:'appeal'},
+    {kr:'기소',en:'prosecution'},{kr:'원고',en:'plaintiff'},{kr:'피고',en:'defendant'},{kr:'변호사(attorney)',en:'attorney'},{kr:'배심원',en:'jury'},
+    {kr:'증언',en:'testimony'},{kr:'주장(allege)',en:'allegation'},{kr:'기소장',en:'indictment'},{kr:'중범죄',en:'felony'},{kr:'경범죄',en:'misdemeanor'},
+    {kr:'법령',en:'statute'},{kr:'조례',en:'ordinance'},{kr:'조항',en:'clause'},{kr:'책임(법)',en:'liability'},{kr:'손해배상',en:'damages'},
+    {kr:'소송',en:'lawsuit'},{kr:'재판',en:'trial'},{kr:'중재',en:'arbitration'},{kr:'합법적인',en:'lawful'},{kr:'불법의',en:'unlawful'},
+    {kr:'정당한',en:'legitimate'},{kr:'판례',en:'precedent'},{kr:'법적인',en:'legal'},{kr:'구금하다',en:'detain'},{kr:'무죄선고하다',en:'acquit'}
+  ]},
+  {id:38,title:'치유의 회관',icon:'🏥',zone:'castle',level:'high',words:[
+    {kr:'진단',en:'diagnosis'},{kr:'처방',en:'prescription'},{kr:'수술(surgery)',en:'surgery'},{kr:'마취',en:'anesthesia'},{kr:'면역',en:'immunity'},
+    {kr:'바이러스',en:'virus'},{kr:'감염',en:'infection'},{kr:'백신',en:'vaccine'},{kr:'회복',en:'recovery'},{kr:'만성의',en:'chronic'},
+    {kr:'급성의',en:'acute'},{kr:'말기의',en:'terminal'},{kr:'악성의',en:'malignant'},{kr:'양성의',en:'benign'},{kr:'병리학',en:'pathology'},
+    {kr:'전염병',en:'epidemic'},{kr:'세계적 유행병',en:'pandemic'},{kr:'격리',en:'quarantine'},{kr:'부검',en:'autopsy'},{kr:'이식',en:'transplant'},
+    {kr:'표본',en:'specimen'},{kr:'항생제',en:'antibiotic'},{kr:'소독제',en:'antiseptic'},{kr:'복용량',en:'dosage'},{kr:'합병증',en:'complication'},
+    {kr:'재발',en:'relapse'},{kr:'차도',en:'remission'},{kr:'종양',en:'tumor'},{kr:'당뇨병',en:'diabetes'},{kr:'고혈압',en:'hypertension'},
+    {kr:'관절염',en:'arthritis'},{kr:'천식',en:'asthma'},{kr:'폐렴',en:'pneumonia'},{kr:'해부학',en:'anatomy'},{kr:'생리학',en:'physiology'}
+  ]},
+  {id:39,title:'미래의 기계신',icon:'🤖',zone:'castle',level:'high',words:[
+    {kr:'지능',en:'intelligence'},{kr:'알고리즘',en:'algorithm'},{kr:'데이터',en:'data'},{kr:'사이버',en:'cyber'},{kr:'암호화',en:'encryption'},
+    {kr:'자동화',en:'automation'},{kr:'가상의',en:'virtual'},{kr:'로봇',en:'robot'},{kr:'혁신',en:'innovation'},{kr:'코딩',en:'coding'},
+    {kr:'인공의',en:'artificial'},{kr:'블록체인',en:'blockchain'},{kr:'암호화폐',en:'cryptocurrency'},{kr:'생체인식의',en:'biometric'},{kr:'양자의',en:'quantum'},
+    {kr:'나노',en:'nano'},{kr:'드론',en:'drone'},{kr:'자율적인',en:'autonomous'},{kr:'인터페이스',en:'interface'},{kr:'프로토콜',en:'protocol'},
+    {kr:'대역폭',en:'bandwidth'},{kr:'서버',en:'server'},{kr:'데이터베이스',en:'database'},{kr:'방화벽',en:'firewall'},{kr:'악성코드',en:'malware'},
+    {kr:'호환성',en:'compatibility'},{kr:'기반시설',en:'infrastructure'},{kr:'시뮬레이션',en:'simulation'},{kr:'증강의',en:'augmented'},{kr:'몰입형의',en:'immersive'},
+    {kr:'반도체',en:'semiconductor'},{kr:'프로세서',en:'processor'},{kr:'실리콘',en:'silicon'},{kr:'해커',en:'hacker'},{kr:'사이버보안',en:'cybersecurity'}
+  ]},
+  {id:40,title:'균열의 도시',icon:'🏙️',zone:'castle',level:'high',words:[
+    {kr:'빈곤',en:'poverty'},{kr:'불평등',en:'inequality'},{kr:'차별',en:'discrimination'},{kr:'인권(rights)',en:'rights'},{kr:'이민',en:'immigration'},
+    {kr:'난민',en:'refugee'},{kr:'폭력',en:'violence'},{kr:'부패',en:'corruption'},{kr:'개혁',en:'reform'},{kr:'운동(사회)',en:'movement'},
+    {kr:'행동주의',en:'activism'},{kr:'시위',en:'protest'},{kr:'청원',en:'petition'},{kr:'옹호',en:'advocacy'},{kr:'부당',en:'injustice'},
+    {kr:'억압',en:'oppression'},{kr:'소외시키다',en:'marginalize'},{kr:'착취하다',en:'exploit'},{kr:'괴롭힘',en:'harassment'},{kr:'학대',en:'abuse'},
+    {kr:'인신매매',en:'trafficking'},{kr:'망명',en:'asylum'},{kr:'대량학살',en:'genocide'},{kr:'홀로코스트',en:'holocaust'},{kr:'인종분리',en:'apartheid'},
+    {kr:'분리',en:'segregation'},{kr:'포함',en:'inclusion'},{kr:'배제',en:'exclusion'},{kr:'관용',en:'tolerance'},{kr:'외국인혐오',en:'xenophobia'},
+    {kr:'인종주의',en:'racism'},{kr:'성차별',en:'sexism'},{kr:'페미니즘',en:'feminism'},{kr:'가부장제',en:'patriarchy'},{kr:'연대',en:'solidarity'}
+  ]},
+  {id:41,title:'시인의 탑',icon:'📖',zone:'sky',level:'high',words:[
+    {kr:'소설',en:'novel'},{kr:'시(poem)',en:'poem'},{kr:'은유',en:'metaphor'},{kr:'상징',en:'symbol'},{kr:'주제',en:'theme'},
+    {kr:'인물',en:'character'},{kr:'줄거리',en:'plot'},{kr:'비평',en:'criticism'},{kr:'장르',en:'genre'},{kr:'영감(literary)',en:'inspiration'},
+    {kr:'서사시',en:'epic'},{kr:'서정시',en:'lyric'},{kr:'산문',en:'prose'},{kr:'운문',en:'verse'},{kr:'직유',en:'simile'},
+    {kr:'역설(literary)',en:'paradox'},{kr:'우화',en:'allegory'},{kr:'풍자',en:'satire'},{kr:'아이러니',en:'irony'},{kr:'주인공',en:'protagonist'},
+    {kr:'적대자',en:'antagonist'},{kr:'화자',en:'narrator'},{kr:'관점',en:'viewpoint'},{kr:'배경',en:'setting'},{kr:'갈등(literary)',en:'conflict'},
+    {kr:'해결',en:'resolution'},{kr:'클라이맥스',en:'climax'},{kr:'복선',en:'foreshadowing'},{kr:'독백',en:'monologue'},{kr:'대사(연극)',en:'dialogue'},
+    {kr:'어조',en:'tone'},{kr:'분위기',en:'atmosphere'},{kr:'은유적인',en:'figurative'},{kr:'자전적인',en:'autobiographical'},{kr:'서술의',en:'narrative'}
+  ]},
+  {id:42,title:'예술의 정수',icon:'🎭',zone:'sky',level:'high',words:[
+    {kr:'추상적인',en:'abstract'},{kr:'구체적인',en:'concrete'},{kr:'인상주의',en:'impressionism'},{kr:'르네상스',en:'renaissance'},{kr:'조각',en:'sculpture'},
+    {kr:'건축',en:'architecture'},{kr:'작곡',en:'composition'},{kr:'멜로디',en:'melody'},{kr:'화음',en:'harmony'},{kr:'안무',en:'choreography'},
+    {kr:'바로크',en:'baroque'},{kr:'표현주의',en:'expressionism'},{kr:'초현실주의',en:'surrealism'},{kr:'미니멀리즘',en:'minimalism'},{kr:'팝아트',en:'popart'},
+    {kr:'캔버스',en:'canvas'},{kr:'팔레트',en:'palette'},{kr:'붓',en:'brush'},{kr:'벽화',en:'mural'},{kr:'풍경화',en:'landscape'},
+    {kr:'정물화',en:'still-life'},{kr:'초상화',en:'portrait'},{kr:'프레스코',en:'fresco'},{kr:'모자이크',en:'mosaic'},{kr:'에칭',en:'etching'},
+    {kr:'교향곡',en:'symphony'},{kr:'협주곡',en:'concerto'},{kr:'소나타',en:'sonata'},{kr:'오페라',en:'opera'},{kr:'발레',en:'ballet'},
+    {kr:'재즈',en:'jazz'},{kr:'클래식',en:'classical'},{kr:'심미적인',en:'aesthetic'},{kr:'장르(art)',en:'genre'},{kr:'기교',en:'technique'}
+  ]},
+  {id:43,title:'시대의 연대기',icon:'⏰',zone:'sky',level:'high',words:[
+    {kr:'고대의',en:'ancient'},{kr:'중세의',en:'medieval'},{kr:'근대의',en:'modern'},{kr:'현대의',en:'contemporary'},{kr:'혁명',en:'revolution'},
+    {kr:'식민지',en:'colony'},{kr:'독립',en:'independence'},{kr:'전쟁',en:'war'},{kr:'조약(history)',en:'treaty'},{kr:'유산',en:'heritage'},
+    {kr:'문명',en:'civilization'},{kr:'왕조',en:'dynasty'},{kr:'제국',en:'empire'},{kr:'왕국',en:'kingdom'},{kr:'봉건제',en:'feudalism'},
+    {kr:'산업의',en:'industrial'},{kr:'산업화',en:'industrialization'},{kr:'식민화',en:'colonization'},{kr:'정복',en:'conquest'},{kr:'점령',en:'occupation'},
+    {kr:'반란',en:'rebellion'},{kr:'폭동',en:'riot'},{kr:'쿠데타',en:'coup'},{kr:'고고학',en:'archaeology'},{kr:'유물(artifact)',en:'artifact'},
+    {kr:'유적',en:'ruins'},{kr:'연대기',en:'chronicle'},{kr:'기록',en:'record'},{kr:'시대',en:'era'},{kr:'세기',en:'century'},
+    {kr:'시기',en:'period'},{kr:'역사적인',en:'historic'},{kr:'전설',en:'legend'},{kr:'유물(relic)',en:'relic'},{kr:'역사가',en:'historian'}
+  ]},
+  {id:44,title:'영혼의 신전',icon:'⛪',zone:'sky',level:'high',words:[
+    {kr:'종교',en:'religion'},{kr:'신앙',en:'faith'},{kr:'의식(종교)',en:'ritual'},{kr:'영혼',en:'soul'},{kr:'명상',en:'meditation'},
+    {kr:'기도',en:'prayer'},{kr:'신성한',en:'sacred'},{kr:'세속의',en:'secular'},{kr:'신화',en:'mythology'},{kr:'예언',en:'prophecy'},
+    {kr:'예언자',en:'prophet'},{kr:'성서',en:'scripture'},{kr:'경전',en:'sutra'},{kr:'성지',en:'sanctuary'},{kr:'사원',en:'temple'},
+    {kr:'성당',en:'cathedral'},{kr:'수도원',en:'monastery'},{kr:'수도사',en:'monk'},{kr:'사제',en:'priest'},{kr:'성인(saint)',en:'saint'},
+    {kr:'천국',en:'heaven'},{kr:'지옥',en:'hell'},{kr:'영원한',en:'eternal'},{kr:'환생',en:'reincarnation'},{kr:'구원',en:'salvation'},
+    {kr:'영적인',en:'spiritual'},{kr:'신성',en:'divinity'},{kr:'경배',en:'worship'},{kr:'순례',en:'pilgrimage'},{kr:'성례',en:'sacrament'},
+    {kr:'유일신교',en:'monotheism'},{kr:'다신교',en:'polytheism'},{kr:'무신론',en:'atheism'},{kr:'불가지론',en:'agnosticism'},{kr:'전통(종교)',en:'tradition'}
+  ]},
+  {id:45,title:'대지의 지도',icon:'🌐',zone:'sky',level:'high',words:[
+    {kr:'대륙',en:'continent'},{kr:'반도',en:'peninsula'},{kr:'해협',en:'strait'},{kr:'사막(고급)',en:'desert'},{kr:'지진',en:'earthquake'},
+    {kr:'화산',en:'volcano'},{kr:'빙하',en:'glacier'},{kr:'위도',en:'latitude'},{kr:'경도',en:'longitude'},{kr:'지형',en:'terrain'},
+    {kr:'반구',en:'hemisphere'},{kr:'적도',en:'equator'},{kr:'극지방',en:'polar'},{kr:'대양',en:'ocean'},{kr:'만(gulf)',en:'gulf'},
+    {kr:'후미',en:'bay'},{kr:'운하',en:'canal'},{kr:'협곡',en:'canyon'},{kr:'산맥',en:'range'},{kr:'고원',en:'plateau'},
+    {kr:'평원',en:'plain'},{kr:'분화구',en:'crater'},{kr:'피오르드',en:'fjord'},{kr:'삼각주',en:'delta'},{kr:'어귀',en:'estuary'},
+    {kr:'협곡(gorge)',en:'gorge'},{kr:'바위틈',en:'crevice'},{kr:'지층',en:'stratum'},{kr:'단층',en:'fault'},{kr:'쓰나미',en:'tsunami'},
+    {kr:'태풍',en:'typhoon'},{kr:'토네이도',en:'tornado'},{kr:'사이클론',en:'cyclone'},{kr:'기후대',en:'zone'},{kr:'지도제작',en:'cartography'}
+  ]},
+  {id:46,title:'추상의 정원',icon:'🌀',zone:'sky',level:'high',words:[
+    {kr:'본질',en:'essence'},{kr:'정체성',en:'identity'},{kr:'모순',en:'contradiction'},{kr:'갈등',en:'conflict'},{kr:'균형',en:'balance'},
+    {kr:'조화',en:'harmony'},{kr:'다양성',en:'diversity'},{kr:'통합',en:'integration'},{kr:'변화',en:'change'},{kr:'안정',en:'stability'},
+    {kr:'개념',en:'concept'},{kr:'관념',en:'notion'},{kr:'추상',en:'abstraction'},{kr:'실체',en:'entity'},{kr:'현상',en:'phenomenon'},
+    {kr:'특성',en:'attribute'},{kr:'특질',en:'trait'},{kr:'본성',en:'nature'},{kr:'성질',en:'quality'},{kr:'양(quantity)',en:'quantity'},
+    {kr:'척도',en:'measure'},{kr:'기준',en:'criterion'},{kr:'규범',en:'norm'},{kr:'표준',en:'standard'},{kr:'원형',en:'archetype'},
+    {kr:'전형',en:'prototype'},{kr:'패러다임',en:'paradigm'},{kr:'프레임워크',en:'framework'},{kr:'구조',en:'structure'},{kr:'체계',en:'system'},
+    {kr:'위계',en:'hierarchy'},{kr:'대칭',en:'symmetry'},{kr:'비대칭',en:'asymmetry'},{kr:'경향',en:'tendency'},{kr:'성향',en:'inclination'}
+  ]},
+  {id:47,title:'심연의 동사',icon:'🌌',zone:'sky',level:'high',words:[
+    {kr:'분석하다',en:'analyze'},{kr:'종합하다',en:'synthesize'},{kr:'추론하다',en:'infer'},{kr:'입증하다',en:'demonstrate'},{kr:'반박하다',en:'refute'},
+    {kr:'조작하다',en:'manipulate'},{kr:'변형하다',en:'transform'},{kr:'수렴하다',en:'converge'},{kr:'발산하다',en:'diverge'},{kr:'진동하다',en:'oscillate'},
+    {kr:'추정하다(추산)',en:'estimate'},{kr:'예측하다',en:'predict'},{kr:'발생시키다',en:'generate'},{kr:'촉진하다',en:'facilitate'},{kr:'중재하다',en:'mediate'},
+    {kr:'고려하다',en:'consider'},{kr:'숙고하다',en:'contemplate'},{kr:'명상하다',en:'meditate'},{kr:'가정하다',en:'assume'},{kr:'추정하다(presume)',en:'presume'},
+    {kr:'함축하다',en:'imply'},{kr:'시사하다',en:'indicate'},{kr:'식별하다',en:'identify'},{kr:'분류하다',en:'categorize'},{kr:'구별하다',en:'distinguish'},
+    {kr:'차별화하다',en:'differentiate'},{kr:'적응하다',en:'adapt'},{kr:'조정하다',en:'adjust'},{kr:'수정하다',en:'modify'},{kr:'변경하다',en:'alter'},
+    {kr:'갱신하다',en:'renew'},{kr:'복원하다',en:'restore'},{kr:'재생하다',en:'regenerate'},{kr:'재구성하다',en:'reconstruct'},{kr:'대체하다',en:'substitute'}
+  ]},
+  {id:48,title:'언어의 보석',icon:'💎',zone:'sky',level:'high',words:[
+    {kr:'모호한',en:'ambiguous'},{kr:'정교한',en:'sophisticated'},{kr:'미묘한',en:'subtle'},{kr:'광대한',en:'vast'},{kr:'풍부한',en:'abundant'},
+    {kr:'사소한',en:'trivial'},{kr:'명백한',en:'obvious'},{kr:'신중한',en:'prudent'},{kr:'대담한',en:'bold'},{kr:'견고한',en:'robust'},
+    {kr:'엄밀한',en:'rigorous'},{kr:'독창적인',en:'innovative'},{kr:'창의적인',en:'creative'},{kr:'유능한',en:'competent'},{kr:'다재다능한',en:'versatile'},
+    {kr:'명료한',en:'lucid'},{kr:'간결한',en:'concise'},{kr:'장황한',en:'verbose'},{kr:'설득력 있는',en:'persuasive'},{kr:'논리적인',en:'logical'},
+    {kr:'일관된',en:'coherent'},{kr:'모순된',en:'contradictory'},{kr:'필연적인',en:'inevitable'},{kr:'우연한',en:'accidental'},{kr:'의도적인',en:'deliberate'},
+    {kr:'무작위의',en:'random'},{kr:'엄숙한',en:'solemn'},{kr:'근엄한',en:'austere'},{kr:'호화로운',en:'luxurious'},{kr:'평범한(mundane)',en:'mundane'},
+    {kr:'독특한',en:'unique'},{kr:'일반적인',en:'generic'},{kr:'적절한',en:'appropriate'},{kr:'부적절한',en:'inappropriate'},{kr:'유효한',en:'valid'}
+  ]},
+  {id:49,title:'학자의 회랑',icon:'📚',zone:'sky',level:'high',words:[
+    {kr:'비교하다',en:'compare'},{kr:'대조하다',en:'contrast'},{kr:'평가하다',en:'evaluate'},{kr:'정당화하다',en:'justify'},{kr:'이행하다',en:'implement'},
+    {kr:'발생하다',en:'occur'},{kr:'기여하다',en:'contribute'},{kr:'활용하다',en:'utilize'},{kr:'강조하다',en:'emphasize'},{kr:'보장하다',en:'ensure'},
+    {kr:'설립하다',en:'establish'},{kr:'유지하다',en:'maintain'},{kr:'획득하다',en:'obtain'},{kr:'노출시키다',en:'expose'},{kr:'유도하다',en:'derive'},
+    {kr:'얻다',en:'gain'},{kr:'성취하다(attain)',en:'attain'},{kr:'반영하다',en:'reflect'},{kr:'겪다',en:'undergo'},{kr:'야기하다',en:'cause'},
+    {kr:'유발하다',en:'induce'},{kr:'촉발하다',en:'trigger'},{kr:'결과로 생기다',en:'result'},{kr:'영향을 끼치다',en:'affect'},{kr:'동반하다',en:'accompany'},
+    {kr:'수반하다',en:'involve'},{kr:'포함하다',en:'include'},{kr:'배제하다',en:'exclude'},{kr:'다루다',en:'address'},{kr:'위임하다',en:'delegate'},
+    {kr:'위촉하다',en:'commission'},{kr:'통치하다',en:'govern'},{kr:'지배하다',en:'dominate'},{kr:'정의하다',en:'define'},{kr:'설립하다(found)',en:'found'}
+  ]},
+  {id:50,title:'언어의 정령',icon:'🌟',zone:'sky',level:'high',words:[
+    {kr:'깨달음',en:'enlightenment'},{kr:'선견지명',en:'foresight'},{kr:'운명',en:'destiny'},{kr:'영원',en:'eternity'},{kr:'무한',en:'infinity'},
+    {kr:'우주',en:'universe'},{kr:'초월하다',en:'transcend'},{kr:'진화하다',en:'evolve'},{kr:'유산(legacy)',en:'legacy'},{kr:'영원한(eternal)',en:'eternal'},
+    {kr:'정신',en:'spirit'},{kr:'영혼(psyche)',en:'psyche'},{kr:'마음챙김의',en:'mindful'},{kr:'존재하다',en:'exist'},{kr:'발현하다',en:'manifest'},
+    {kr:'정수',en:'quintessence'},{kr:'심오한',en:'profound'},{kr:'본질적인',en:'fundamental'},{kr:'필수적인',en:'essential'},{kr:'궁극의',en:'ultimate'},
+    {kr:'전체의',en:'entire'},{kr:'총체적인',en:'holistic'},{kr:'환상',en:'illusion'},{kr:'착각',en:'delusion'},{kr:'각성',en:'awakening'},
+    {kr:'명상의',en:'contemplative'},{kr:'우주적인',en:'cosmic'},{kr:'우주론',en:'cosmology'},{kr:'존재론적인',en:'existential'},{kr:'영원성',en:'permanence'},
+    {kr:'영속성',en:'persistence'},{kr:'신비',en:'mystery'},{kr:'경이',en:'awe'},{kr:'장엄한',en:'majestic'},{kr:'숭고한',en:'sublime'}
+  ]}
+];
+
+const ZONE_INFO = {
+  underground:{icon:'🕯️',label:'UNDERGROUND · 잊혀진 동굴'},
+  forest:{icon:'🌲',label:'WHISPERING WOODS · 속삭이는 숲'},
+  hills:{icon:'⛰️',label:'WINDSWEPT HILLS · 바람의 언덕'},
+  castle:{icon:'🏰',label:'CRYSTAL CASTLE · 수정의 성'},
+  sky:{icon:'☁️',label:'SKY SANCTUM · 천공의 신전'}
+};
+
+/* ============== STORAGE ============== */
+const STORAGE_KEY = 'word_quest_save_v2';
+async function saveState(s){
+  try{
+    const str = JSON.stringify(s);
+    if (window.storage && window.storage.set) {
+      await window.storage.set(STORAGE_KEY, str);
+    } else {
+      localStorage.setItem(STORAGE_KEY, str);
+    }
+  }catch(e){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }catch(e2){}
+  }
+}
+async function loadState(){
+  try{
+    let str = null;
+    if (window.storage && window.storage.get) {
+      const r = await window.storage.get(STORAGE_KEY);
+      if (r && r.value) str = r.value;
+    } else {
+      str = localStorage.getItem(STORAGE_KEY);
+    }
+    if (!str) return null;
+    return JSON.parse(str);
+  }catch(e){
+    try{
+      const s = localStorage.getItem(STORAGE_KEY);
+      return s ? JSON.parse(s) : null;
+    }catch(e2){ return null; }
+  }
+}
+
+/* ============== STATE ============== */
+let state = {
+  characterId: null,
+  clearedQuests: [],
+  attempts: {},
+  direction: 'kr2en' // 'kr2en' (한국어→영어) or 'en2kr' (영어→한국어)
+};
+let selectedCharacter = null;
+let currentQuest = null;
+let memorizeTimer = null;
+let memorizeTimeLeft = 0;
+let testQuestions = [];
+let currentQIndex = 0;
+let testCorrectCount = 0;
+let testAttempts = 0;
+
+/* ============== SPEECH SYNTHESIS ============== */
+let currentSpeakingBtn = null;
+let voicesLoaded = false;
+
+function loadVoices(){
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    voicesLoaded = true;
+  }
+}
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+
+function speak(text, btn){
+  if (!('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    if (currentSpeakingBtn && currentSpeakingBtn !== btn) {
+      currentSpeakingBtn.classList.remove('speaking');
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    utter.pitch = 1;
+    utter.volume = 1;
+    // Try to pick an English voice
+    const voices = speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang.startsWith('en'));
+    if (enVoice) utter.voice = enVoice;
+    if (btn) {
+      btn.classList.add('speaking');
+      currentSpeakingBtn = btn;
+      utter.onend = () => {
+        btn.classList.remove('speaking');
+        if (currentSpeakingBtn === btn) currentSpeakingBtn = null;
+      };
+      utter.onerror = () => {
+        btn.classList.remove('speaking');
+      };
+    }
+    speechSynthesis.speak(utter);
+  } catch(e) { /* silent fail */ }
+}
+
+/* ============== INIT ============== */
+async function init(){
+  const saved = await loadState();
+  if (saved) {
+    state = Object.assign(state, saved);
+    if (!state.direction) state.direction = 'kr2en';
+  }
+  if (state.characterId) {
+    selectedCharacter = CHARACTERS.find(c=>c.id===state.characterId) || CHARACTERS[0];
+    enterMap();
+  } else {
+    renderCharGrid();
+  }
+  bindEvents();
+  updateDirectionUI();
+}
+
+function bindEvents(){
+  document.getElementById('beginBtn').onclick = ()=>{
+    if (!selectedCharacter) return;
+    state.characterId = selectedCharacter.id;
+    saveState(state);
+    enterMap();
+  };
+  document.getElementById('questBack').onclick = backToMap;
+  document.getElementById('mePill').onclick = openProfile;
+  document.getElementById('skipMemorize').onclick = startTest;
+  document.getElementById('submitAnswer').onclick = submitAnswer;
+  document.getElementById('qInput').addEventListener('keydown',(e)=>{
+    if (e.key==='Enter'){ e.preventDefault(); submitAnswer(); }
+  });
+  document.getElementById('resultClose').onclick = ()=> closeModal('resultOverlay');
+  document.getElementById('profileClose').onclick = ()=> closeModal('profileOverlay');
+  document.getElementById('resetBtn').onclick = resetProgress;
+
+  document.querySelectorAll('#dirToggle .dir-option').forEach(opt=>{
+    opt.onclick = ()=> setDirection(opt.dataset.dir);
+  });
+
+  document.getElementById('resultOverlay').addEventListener('click',(e)=>{
+    if (e.target.id==='resultOverlay') closeModal('resultOverlay');
+  });
+  document.getElementById('profileOverlay').addEventListener('click',(e)=>{
+    if (e.target.id==='profileOverlay') closeModal('profileOverlay');
+  });
+}
+
+function setDirection(dir){
+  state.direction = dir;
+  saveState(state);
+  updateDirectionUI();
+}
+function updateDirectionUI(){
+  document.querySelectorAll('#dirToggle .dir-option').forEach(opt=>{
+    opt.classList.toggle('active', opt.dataset.dir === state.direction);
+  });
+}
+
+/* ============== WELCOME / CHARACTER SELECT ============== */
+function renderCharGrid(){
+  const grid = document.getElementById('charGrid');
+  grid.innerHTML = '';
+  CHARACTERS.forEach(c=>{
+    const cell = document.createElement('div');
+    cell.className = 'char-cell';
+    cell.innerHTML = `<div class="emoji">${c.emoji}</div><div class="name">${c.name}</div>`;
+    cell.onclick = ()=>{
+      selectedCharacter = c;
+      document.querySelectorAll('.char-cell').forEach(x=>x.classList.remove('selected'));
+      cell.classList.add('selected');
+      document.getElementById('beginBtn').disabled = false;
+    };
+    grid.appendChild(cell);
+  });
+}
+
+/* ============== MAP ============== */
+function enterMap(){
+  showScreen('mapScreen');
+  renderMe();
+  renderMap();
+}
+function renderMe(){
+  if (!selectedCharacter) return;
+  document.getElementById('meEmoji').textContent = selectedCharacter.emoji;
+  document.getElementById('meName').textContent = selectedCharacter.name;
+}
+function renderMap(){
+  const map = document.getElementById('towerMap');
+  map.innerHTML = '';
+
+  const clearedIds = new Set(state.clearedQuests.map(c=>c.id));
+  let firstUnclearedIdx = QUESTS.findIndex(q=>!clearedIds.has(q.id));
+  if (firstUnclearedIdx === -1) firstUnclearedIdx = QUESTS.length; // all cleared
+
+  document.getElementById('clearedCount').textContent = state.clearedQuests.length;
+  let wordsLearned = 0;
+  state.clearedQuests.forEach(c=>{
+    const q = QUESTS.find(x=>x.id===c.id);
+    if (q) wordsLearned += q.words.length;
+  });
+  document.getElementById('wordsLearned').textContent = wordsLearned;
+
+  // build top-down (sky first) so it visually tower-feels
+  const reversed = [...QUESTS].reverse();
+  let lastZone = null;
+  reversed.forEach((q,i)=>{
+    if (q.zone !== lastZone){
+      const div = document.createElement('div');
+      div.className = 'zone-divider';
+      div.innerHTML = `<div class="zone-icon">${ZONE_INFO[q.zone].icon}</div><div class="zone-label">${ZONE_INFO[q.zone].label}</div>`;
+      map.appendChild(div);
+      lastZone = q.zone;
+    }
+    const realIdx = QUESTS.findIndex(x=>x.id===q.id);
+    const isCleared = clearedIds.has(q.id);
+    const isUnlocked = (realIdx === firstUnclearedIdx);
+    const isLocked = !isCleared && !isUnlocked;
+    const side = realIdx % 2 === 0 ? 'left' : 'right';
+    const row = document.createElement('div');
+    row.className = `node-row ${side}`;
+    const node = document.createElement('div');
+    node.className = `node ${isCleared?'cleared':''} ${isUnlocked?'unlocked':''} ${isLocked?'locked':''}`;
+    const attemptsCount = state.attempts[q.id] || 0;
+    const meta = isCleared ? '✓ 클리어' : (isUnlocked ? '도전하기 →' : '🔒 잠김');
+    node.innerHTML = `
+      <div class="node-icon">${q.icon}</div>
+      <div class="node-info">
+        <div class="node-num">QUEST ${String(q.id).padStart(2,'0')}</div>
+        <div class="node-title">${q.title}</div>
+        <div class="node-meta">${meta} · ${q.words.length}단어${attemptsCount?' · 시도 '+attemptsCount:''}</div>
+      </div>
+    `;
+    if (!isLocked){
+      node.onclick = ()=> openQuest(q);
+    }
+    row.appendChild(node);
+    map.appendChild(row);
+  });
+}
+
+/* ============== QUEST ============== */
+function openQuest(q){
+  currentQuest = q;
+  state.attempts[q.id] = (state.attempts[q.id] || 0) + 1;
+  saveState(state);
+
+  document.getElementById('questNum').textContent = `QUEST ${String(q.id).padStart(2,'0')}`;
+  document.getElementById('questTitle').textContent = q.title;
+  document.getElementById('memorizeTitle').textContent = `${q.icon} ${q.title}`;
+
+  // Memorize time based on word count - roughly 4-5 sec/word
+  let secPerWord;
+  if (q.level === 'elementary') secPerWord = 4;
+  else if (q.level === 'middle') secPerWord = 4.5;
+  else secPerWord = 5;
+  memorizeTimeLeft = Math.round(q.words.length * secPerWord);
+
+  document.getElementById('memorizePhase').style.display = 'block';
+  document.getElementById('testPhase').style.display = 'none';
+  showScreen('questScreen');
+
+  // Render word list with speak buttons
+  const list = document.getElementById('wordList');
+  list.innerHTML = '';
+  q.words.forEach(w=>{
+    const item = document.createElement('div');
+    item.className = 'word-item';
+    item.innerHTML = `
+      <span class="kr">${w.kr}</span>
+      <span class="en">
+        <span>${w.en}</span>
+        <button class="speak-btn" data-word="${w.en}" title="발음 듣기">🔊</button>
+      </span>
+    `;
+    list.appendChild(item);
+  });
+  // bind speak buttons
+  list.querySelectorAll('.speak-btn').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      speak(btn.dataset.word, btn);
+    };
+  });
+
+  startMemorizeTimer();
+}
+
+function startMemorizeTimer(){
+  if (memorizeTimer) clearInterval(memorizeTimer);
+  updateTimerDisplay();
+  memorizeTimer = setInterval(()=>{
+    memorizeTimeLeft--;
+    updateTimerDisplay();
+    if (memorizeTimeLeft <= 0){
+      clearInterval(memorizeTimer);
+      startTest();
+    }
+  },1000);
+}
+function updateTimerDisplay(){
+  const t = document.getElementById('timer');
+  const m = Math.floor(memorizeTimeLeft/60);
+  const s = memorizeTimeLeft%60;
+  t.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (memorizeTimeLeft <= 10) t.classList.add('urgent');
+  else t.classList.remove('urgent');
+}
+
+function startTest(){
+  if (memorizeTimer) clearInterval(memorizeTimer);
+  // Cancel any ongoing speech
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+
+  testQuestions = [...currentQuest.words].sort(()=>Math.random()-0.5);
+  currentQIndex = 0;
+  testCorrectCount = 0;
+  testAttempts = testQuestions.length;
+  document.getElementById('memorizePhase').style.display = 'none';
+  document.getElementById('testPhase').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion(){
+  if (currentQIndex >= testQuestions.length){
+    finishTest();
+    return;
+  }
+  const q = testQuestions[currentQIndex];
+  document.getElementById('qCounter').textContent = `QUESTION ${currentQIndex+1} / ${testQuestions.length}`;
+
+  const promptEl = document.getElementById('qPrompt');
+  const input = document.getElementById('qInput');
+
+  if (state.direction === 'en2kr') {
+    // Show English, user types Korean
+    promptEl.classList.add('en-mode');
+    promptEl.innerHTML = `<span>${q.en}</span><button class="speak-btn large" id="qSpeakBtn" title="발음 듣기">🔊</button>`;
+    const qSpeakBtn = document.getElementById('qSpeakBtn');
+    qSpeakBtn.onclick = (e)=>{
+      e.stopPropagation();
+      speak(q.en, qSpeakBtn);
+    };
+    input.classList.add('kr-mode');
+    input.placeholder = '한국어 뜻을 입력...';
+    input.lang = 'ko';
+    // Auto-play the English word
+    setTimeout(()=> speak(q.en, qSpeakBtn), 250);
+  } else {
+    // Show Korean, user types English
+    promptEl.classList.remove('en-mode');
+    promptEl.textContent = q.kr;
+    input.classList.remove('kr-mode');
+    input.placeholder = '영단어를 입력...';
+    input.lang = 'en';
+  }
+
+  input.value = '';
+  input.classList.remove('correct','wrong');
+  input.disabled = false;
+  input.focus();
+  document.getElementById('qFeedback').textContent = '';
+  document.getElementById('qFeedback').className = 'q-feedback';
+
+  const pct = (currentQIndex/testQuestions.length)*100;
+  document.getElementById('testProgress').style.width = pct+'%';
+}
+
+function normalizeKr(s){
+  return s.trim().replace(/\s+/g,'').toLowerCase();
+}
+function stripParens(s){
+  return s.replace(/\([^)]*\)/g,'').replace(/[（）]/g,'').replace(/\s+/g,'').trim();
+}
+function checkKrAnswer(user, answer){
+  const u = normalizeKr(user);
+  const a = normalizeKr(answer);
+  if (u === a) return true;
+  // also try without parenthetical clarifications
+  const aStripped = stripParens(answer).toLowerCase();
+  const uStripped = stripParens(user).toLowerCase();
+  if (uStripped === aStripped) return true;
+  if (u === aStripped) return true;
+  return false;
+}
+
+function submitAnswer(){
+  const input = document.getElementById('qInput');
+  const q = testQuestions[currentQIndex];
+  const userAns = input.value.trim();
+  if (!userAns) return;
+
+  const fb = document.getElementById('qFeedback');
+  let isCorrect = false;
+  if (state.direction === 'en2kr') {
+    isCorrect = checkKrAnswer(userAns, q.kr);
+  } else {
+    isCorrect = userAns.toLowerCase().trim() === q.en.toLowerCase().trim();
+  }
+
+  if (isCorrect){
+    testCorrectCount++;
+    input.classList.add('correct');
+    fb.textContent = '✓ 정답!';
+    fb.className = 'q-feedback correct';
+    input.disabled = true;
+    // Reinforce: speak the English word
+    if (state.direction === 'kr2en') {
+      setTimeout(()=> speak(q.en), 50);
+    }
+    setTimeout(()=>{
+      currentQIndex++;
+      showQuestion();
+    }, 700);
+  } else {
+    input.classList.add('wrong');
+    const correctAns = state.direction === 'en2kr' ? q.kr : q.en;
+    fb.textContent = `✗ 오답! 정답: ${correctAns}`;
+    fb.className = 'q-feedback wrong';
+    input.disabled = true;
+    // For wrong answer in kr2en, speak correct so they hear it
+    if (state.direction === 'kr2en') {
+      setTimeout(()=> speak(q.en), 100);
+    }
+    setTimeout(()=>{
+      currentQIndex++;
+      showQuestion();
+    }, 1600);
+  }
+}
+
+function finishTest(){
+  document.getElementById('testProgress').style.width = '100%';
+  const passed = testCorrectCount === testQuestions.length;
+  if (passed){
+    // mark cleared if not already
+    if (!state.clearedQuests.find(c=>c.id===currentQuest.id)){
+      state.clearedQuests.push({
+        id: currentQuest.id,
+        title: currentQuest.title,
+        icon: currentQuest.icon,
+        date: new Date().toISOString(),
+        attempts: state.attempts[currentQuest.id] || 1
+      });
+      saveState(state);
+    }
+    showResult(true);
+  } else {
+    showResult(false);
+  }
+}
+
+function showResult(won){
+  const isComplete = won && state.clearedQuests.length === QUESTS.length;
+  const artEl = document.getElementById('resultArt');
+  const titleEl = document.getElementById('resultTitle');
+  const msgEl = document.getElementById('resultMsg');
+  const btnsEl = document.getElementById('resultBtns');
+
+  if (isComplete){
+    artEl.textContent = '🌟👑🌟';
+    titleEl.textContent = 'TRUE ENDING';
+    titleEl.className = 'result-title win';
+    msgEl.innerHTML = `언어의 정령이 깨어났어요!\n당신은 진정한 단어의 마스터입니다.\n<small style="color:var(--ink-soft)">총 ${QUESTS.reduce((a,q)=>a+q.words.length,0)}개의 단어를 정복했어요</small>`;
+    btnsEl.innerHTML = '<button class="btn gold" id="resultMapBtn">탑으로 돌아가기</button>';
+  } else if (won){
+    artEl.textContent = '🎉✨';
+    titleEl.textContent = 'VICTORY';
+    titleEl.className = 'result-title win';
+    msgEl.textContent = `${currentQuest.icon} ${currentQuest.title} 클리어!\n${testCorrectCount}/${testAttempts} 정답`;
+    const nextQ = QUESTS.find(q=>!state.clearedQuests.find(c=>c.id===q.id));
+    btnsEl.innerHTML = nextQ
+      ? `<button class="btn" id="resultMapBtn">탑으로</button><button class="btn magic" id="resultNextBtn">다음 시험 →</button>`
+      : '<button class="btn gold" id="resultMapBtn">탑으로 돌아가기</button>';
+  } else {
+    artEl.textContent = '💔';
+    titleEl.textContent = 'DEFEAT';
+    titleEl.className = 'result-title lose';
+    msgEl.textContent = `${testCorrectCount}/${testAttempts} 정답\n조금 더 외운 다음 다시 도전해봐요!`;
+    btnsEl.innerHTML = '<button class="btn" id="resultMapBtn">탑으로</button><button class="btn magic" id="resultRetryBtn">다시 도전</button>';
+  }
+  openModal('resultOverlay');
+
+  const mapBtn = document.getElementById('resultMapBtn');
+  if (mapBtn) mapBtn.onclick = ()=>{ closeModal('resultOverlay'); backToMap(); };
+  const retry = document.getElementById('resultRetryBtn');
+  if (retry) retry.onclick = ()=>{ closeModal('resultOverlay'); openQuest(currentQuest); };
+  const next = document.getElementById('resultNextBtn');
+  if (next) next.onclick = ()=>{
+    closeModal('resultOverlay');
+    const nextQ = QUESTS.find(q=>!state.clearedQuests.find(c=>c.id===q.id));
+    if (nextQ) openQuest(nextQ); else backToMap();
+  };
+}
+
+function backToMap(){
+  if (memorizeTimer) clearInterval(memorizeTimer);
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  enterMap();
+}
+
+/* ============== PROFILE ============== */
+function openProfile(){
+  document.getElementById('profileName').textContent = `${selectedCharacter.emoji} ${selectedCharacter.name}`;
+  document.getElementById('psCleared').textContent = state.clearedQuests.length;
+  let words = 0;
+  state.clearedQuests.forEach(c=>{
+    const q = QUESTS.find(x=>x.id===c.id);
+    if (q) words += q.words.length;
+  });
+  document.getElementById('psWords').textContent = words;
+  document.getElementById('psPercent').textContent = Math.round(state.clearedQuests.length/QUESTS.length*100)+'%';
+
+  const list = document.getElementById('clearList');
+  list.innerHTML = '';
+  if (state.clearedQuests.length === 0){
+    list.innerHTML = '<div class="clear-list-empty">아직 클리어한 시험이 없어요.<br>탑의 첫 번째 문에 도전해보세요!</div>';
+  } else {
+    [...state.clearedQuests].reverse().forEach(c=>{
+      const row = document.createElement('div');
+      row.className = 'clear-row';
+      const d = new Date(c.date);
+      const dateStr = `${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+      row.innerHTML = `
+        <span class="ce-icon">${c.icon}</span>
+        <span class="ce-title">Q${String(c.id).padStart(2,'0')} · ${c.title}</span>
+        <span class="ce-date">${dateStr}</span>
+      `;
+      list.appendChild(row);
+    });
+  }
+  openModal('profileOverlay');
+}
+
+async function resetProgress(){
+  if (!confirm('정말 모든 기록을 초기화할까요? 이 작업은 되돌릴 수 없어요.')) return;
+  state = {characterId:null, clearedQuests:[], attempts:{}, direction:'kr2en'};
+  selectedCharacter = null;
+  try {
+    if (window.storage && window.storage.delete) {
+      await window.storage.delete(STORAGE_KEY);
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch(e){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e2){}
+  }
+  closeModal('profileOverlay');
+  renderCharGrid();
+  document.getElementById('beginBtn').disabled = true;
+  showScreen('welcomeScreen');
+}
+
+/* ============== UI HELPERS ============== */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+init();
+</script>
+</body>
+</html>
